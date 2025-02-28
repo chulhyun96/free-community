@@ -1,4 +1,4 @@
-package com.cheolhyeon.free_community.user.repository;
+package com.cheolhyeon.free_community.user.repository.entity;
 
 import com.cheolhyeon.free_community.user.domain.User;
 import jakarta.persistence.*;

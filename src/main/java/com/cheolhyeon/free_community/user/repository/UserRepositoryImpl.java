@@ -1,6 +1,7 @@
 package com.cheolhyeon.free_community.user.repository;
 
 import com.cheolhyeon.free_community.user.domain.User;
+import com.cheolhyeon.free_community.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_community.user.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
