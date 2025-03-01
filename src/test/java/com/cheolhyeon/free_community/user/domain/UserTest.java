@@ -26,4 +26,12 @@ class UserTest {
 
         assertThat(user.getNickname()).isEqualTo(updateTest.getNickname());
     }
+
+    @Test
+    void increaseActionPoint() {
+        UserCreateRequest test = new UserCreateRequest("test");
+        User user = User.from(test);
+        user.increaseActionPoint();
+        assertThat(user.getActionPoint()).isEqualTo(1);
+    }
 }

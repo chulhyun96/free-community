@@ -23,13 +23,16 @@ public class PostService {
     private final UserRepository userRepository;
     private final ImageSaveFormatter saveFormatter;
 
-    /*public Post create(PostCreateRequest request, List<MultipartFile> images) {
+    public Post create(PostCreateRequest request, List<MultipartFile> images) {
         Long writerId = getById(request).getId();
         String jsonFormToSave = saveFormatter.formatToSave(images);
-        return postRepository.save(Post.from(request, writerId, jsonFormToSave));
+        log.info("jsonFormToSave: {}", jsonFormToSave);
+        return postRepository.save(
+                Post.from(request, writerId, jsonFormToSave)
+        ).toModel();
     }
 
     private User getById(PostCreateRequest request) {
-        return userRepository.findById(request.getWriterId());
-    }*/
+        return userRepository.findById(request.getWriterId()).toModel();
+    }
 }

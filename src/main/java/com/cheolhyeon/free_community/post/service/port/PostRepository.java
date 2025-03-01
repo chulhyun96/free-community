@@ -6,5 +6,5 @@ import com.cheolhyeon.free_community.user.repository.entity.UserEntity;
 
 public interface PostRepository {
 
-    Post save(Post newPost);
+    PostEntity save(Post newPost);
 }

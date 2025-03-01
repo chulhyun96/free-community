@@ -1,11 +1,9 @@
 package com.cheolhyeon.free_community.post.controller;
 
 import com.cheolhyeon.free_community.post.controller.request.PostCreateRequest;
-import com.cheolhyeon.free_community.post.controller.response.PostCreateResponse;
 import com.cheolhyeon.free_community.post.domain.Post;
 import com.cheolhyeon.free_community.post.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -19,12 +17,11 @@ import java.util.List;
 public class PostController {
     private final PostService postService;
 
-    /*@PostMapping(value = "/posts", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/posts")
     public ResponseEntity<?> createPost(
             @RequestPart("post") PostCreateRequest request,
             @RequestPart(value = "files", required = false) List<MultipartFile> images) {
         Post newPost = postService.create(request, images);
-        PostCreateResponse.from(newPost);
-        return null;
-    }*/
+        return ResponseEntity.ok(newPost);
+    }
 }
