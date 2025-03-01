@@ -1,0 +1,47 @@
+package com.cheolhyeon.free_community.user.service;
+
+import com.cheolhyeon.free_community.user.controller.request.UserCreateRequest;
+import com.cheolhyeon.free_community.user.domain.User;
+import com.cheolhyeon.free_community.user.service.port.UserRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Objects;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
+class UserServiceTest {
+
+    @Mock
+    UserRepository userRepository;
+
+    @InjectMocks
+    UserService userService;
+
+    @Test
+    void createUser() {
+        UserCreateRequest request = new UserCreateRequest("newUser");
+        User user = User.from(request);
+
+        given(userRepository.save(any(User.class))).willReturn(user);
+
+        // when (테스트 동작 실행)
+        User createdUser = userService.create(request);
+
+        // then (검증)
+        assertAll(
+                () -> assertThat(createdUser).isNotNull(),
+                () -> assertThat(createdUser.getNickname()).isEqualTo("newUser"),
+                () -> assertThat(createdUser.getActionPoint()).isEqualTo(0L)
+        );
+    }
+}
