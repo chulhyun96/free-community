@@ -11,10 +11,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserCreateResponse {
+    private Long id;
     private String nickname;
     private Long actionPoint;
 
     public static UserCreateResponse from(User newUser) {
-        return new UserCreateResponse(newUser.getNickname(), newUser.getActionPoint());
+        return new UserCreateResponse(newUser.getId(),newUser.getNickname(), newUser.getActionPoint());
     }
 }
