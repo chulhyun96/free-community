@@ -1,8 +1,8 @@
 package com.cheolhyeon.free_community.user.domain;
 
+import com.cheolhyeon.free_community.post.domain.Post;
 import com.cheolhyeon.free_community.user.controller.request.UserCreateRequest;
 import com.cheolhyeon.free_community.user.controller.request.UserUpdateRequest;
-import com.cheolhyeon.free_community.user.repository.entity.UserEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -39,6 +39,15 @@ public class User {
     public void increaseActionPoint() {
         this.actionPoint += 1;
     }
+    public void addPost(Post post) {
+        myHistory.addPost(post);
+    }
+
+    /*
+    public void addComment(Comment comment) {
+        myHistory.addComment(comment);
+    }
+    * */
 
 
     // 차단 기능, 비정상적인 활동에 대한 차단(다른 사용자들로 부터 신고를 N회 이상 당한 계정에 대한 조취)
