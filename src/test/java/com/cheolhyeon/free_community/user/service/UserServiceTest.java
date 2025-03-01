@@ -2,6 +2,7 @@ package com.cheolhyeon.free_community.user.service;
 
 import com.cheolhyeon.free_community.user.controller.request.UserCreateRequest;
 import com.cheolhyeon.free_community.user.domain.User;
+import com.cheolhyeon.free_community.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_community.user.service.port.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,7 +47,7 @@ class UserServiceTest {
     @Test
     void getById() {
         //given
-        User getUser = User.builder()
+        UserEntity getUser = UserEntity.builder()
                 .id(1L)
                 .nickname("getUser")
                 .build();

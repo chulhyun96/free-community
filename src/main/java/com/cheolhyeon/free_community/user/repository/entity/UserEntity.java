@@ -1,5 +1,6 @@
 package com.cheolhyeon.free_community.user.repository.entity;
 
+import com.cheolhyeon.free_community.user.controller.request.UserUpdateRequest;
 import com.cheolhyeon.free_community.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,8 +26,8 @@ public class UserEntity {
         UserEntity userEntity = new UserEntity();
         userEntity.nickname = user.getNickname();
         userEntity.actionPoint = user.getActionPoint();
-        userEntity.createdAt = user.getCreateAt();
-        userEntity.updatedAt = user.getUpdateAt();
+        userEntity.createdAt = user.getCreatedAt();
+        userEntity.updatedAt = user.getUpdatedAt();
         return userEntity;
     }
 
@@ -35,8 +36,13 @@ public class UserEntity {
                 .id(id)
                 .nickname(nickname)
                 .actionPoint(actionPoint)
-                .createAt(createdAt)
-                .updateAt(updatedAt)
+                .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
+    }
+
+    public void syncWith(User user) {
+        this.nickname = user.getNickname();
+        this.updatedAt = LocalDateTime.now();
     }
 }

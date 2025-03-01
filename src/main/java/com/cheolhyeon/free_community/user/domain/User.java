@@ -2,8 +2,7 @@ package com.cheolhyeon.free_community.user.domain;
 
 import com.cheolhyeon.free_community.user.controller.request.UserCreateRequest;
 import com.cheolhyeon.free_community.user.controller.request.UserUpdateRequest;
-import com.cheolhyeon.free_community.user.exception.UserErrorStatus;
-import com.cheolhyeon.free_community.user.exception.UserException;
+import com.cheolhyeon.free_community.user.repository.entity.UserEntity;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -16,24 +15,22 @@ public class User {
     private Long id;
     private String nickname;
     private Long actionPoint;
-    private LocalDateTime createAt;
-    private LocalDateTime updateAt;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
 
     public static User from(UserCreateRequest request) {
         User user = new User();
         user.nickname = request.getUsername();
         user.actionPoint = 0L;
-        user.createAt = LocalDateTime.now();
-        user.updateAt = LocalDateTime.now();
+        user.createdAt = LocalDateTime.now();
+        user.updatedAt = LocalDateTime.now();
         return user;
     }
 
     public void updateNickname(UserUpdateRequest request) {
-        if (request.getNickname().isEmpty() || request.getNickname().length() <= 10) {
-            throw new UserException(UserErrorStatus.INVALID_NICKNAME_LENGTH);
-        }
         this.nickname = request.getNickname();
+        this.updatedAt = LocalDateTime.now();
     }
 
     // 사용자 활동 이력 관리(최근 작성한 게시글, 댓글 관리)

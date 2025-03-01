@@ -19,10 +19,10 @@ public class Post {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static Post from(PostCreateRequest request, String imageUrl) {
+    public static Post from(PostCreateRequest request, Long writerId,String imageUrl) {
         Post post = new Post();
         post.categoryId = request.getCategoryId();
-        post.userId = request.getWriterId();
+        post.userId = writerId;
         post.title = request.getTitle();
         post.content = request.getContent();
         post.imageUrl = imageUrl;
