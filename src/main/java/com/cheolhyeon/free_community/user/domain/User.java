@@ -15,9 +15,9 @@ public class User {
     private Long id;
     private String nickname;
     private Long actionPoint;
+    private MyHistory myHistory;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
-
 
     public static User from(UserCreateRequest request) {
         User user = new User();
@@ -25,6 +25,7 @@ public class User {
         user.actionPoint = 0L;
         user.createdAt = LocalDateTime.now();
         user.updatedAt = LocalDateTime.now();
+        user.myHistory = new MyHistory();
         return user;
     }
 
@@ -38,7 +39,8 @@ public class User {
     public void increaseActionPoint() {
         this.actionPoint += 1;
     }
-    // 사용자 활동 이력 관리(최근 작성한 게시글, 댓글 관리)
+
+
     // 차단 기능, 비정상적인 활동에 대한 차단(다른 사용자들로 부터 신고를 N회 이상 당한 계정에 대한 조취)
 
 }
