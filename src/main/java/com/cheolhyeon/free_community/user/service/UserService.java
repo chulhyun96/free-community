@@ -25,7 +25,7 @@ public class UserService {
         return userRepository.findById(id).toModel();
     }
 
-    public User update(Long id, UserUpdateRequest request) {
+    public User updateById(Long id, UserUpdateRequest request) {
         UserEntity userEntity = userRepository.findById(id);
 
         User user = userEntity.toModel();
