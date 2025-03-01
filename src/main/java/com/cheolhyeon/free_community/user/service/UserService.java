@@ -1,6 +1,7 @@
 package com.cheolhyeon.free_community.user.service;
 
 import com.cheolhyeon.free_community.user.controller.request.UserCreateRequest;
+import com.cheolhyeon.free_community.user.controller.request.UserUpdateRequest;
 import com.cheolhyeon.free_community.user.domain.User;
 import com.cheolhyeon.free_community.user.service.port.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,5 +22,11 @@ public class UserService {
         // 사용자 활동 이력 관리, 최근 작성한 게시글(제목과 생성날짜)
         // 게시글에 댓글이 있다면 게시글 제목 밑에 댓글 내용과 댓글 생성 날짜
         return userRepository.findById(id);
+    }
+
+    public User update(Long id, UserUpdateRequest request) {
+        User user = userRepository.findById(id);
+        user.updateNickname(request);
+        return userRepository.update(user);
     }
 }
