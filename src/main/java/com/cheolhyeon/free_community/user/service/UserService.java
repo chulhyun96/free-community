@@ -16,4 +16,10 @@ public class UserService {
     public User create(UserCreateRequest request) {
         return userRepository.save(User.from(request));
     }
+
+    public User getById(Long id) {
+        // 사용자 활동 이력 관리, 최근 작성한 게시글(제목과 생성날짜)
+        // 게시글에 댓글이 있다면 게시글 제목 밑에 댓글 내용과 댓글 생성 날짜
+        return userRepository.findById(id);
+    }
 }
