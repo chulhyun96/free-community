@@ -4,7 +4,6 @@ import com.cheolhyeon.free_community.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_community.post.domain.Post;
 import com.cheolhyeon.free_community.post.service.PostService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestPart;
