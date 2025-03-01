@@ -12,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
@@ -25,6 +26,7 @@ class UserServiceTest {
 
     @Test
     void createUser() {
+        //given
         UserCreateRequest request = new UserCreateRequest("newUser");
         User user = User.from(request);
 
@@ -39,5 +41,22 @@ class UserServiceTest {
                 () -> assertThat(createdUser.getNickname()).isEqualTo("newUser"),
                 () -> assertThat(createdUser.getActionPoint()).isEqualTo(0L)
         );
+    }
+
+    @Test
+    void getById() {
+        //given
+        User getUser = User.builder()
+                .id(1L)
+                .nickname("getUser")
+                .build();
+        given(userRepository.findById(anyLong())).willReturn(getUser);
+
+        //when
+        User findUser = userService.getById(getUser.getId());
+
+        //then
+        assertThat(findUser).isNotNull();
+        assertThat(findUser.getNickname()).isEqualTo("getUser");
     }
 }
