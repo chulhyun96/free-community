@@ -31,9 +31,9 @@ class ViewCountBackUpRepositoryTest {
         em.flush();
         em.clear();
         //when
-        int result1 = viewCountBackUpRepository.updateViewCount(1L, 100);
-        int result2 = viewCountBackUpRepository.updateViewCount(1L, 300);
-        int result3 = viewCountBackUpRepository.updateViewCount(1L, 200);
+        int result1 = viewCountBackUpRepository.updateViewCount(1L, 100L);
+        int result2 = viewCountBackUpRepository.updateViewCount(1L, 300L);
+        int result3 = viewCountBackUpRepository.updateViewCount(1L, 200L);
 
         //then
         Assertions.assertThat(result1).isEqualTo(1);

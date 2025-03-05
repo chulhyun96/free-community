@@ -18,6 +18,4 @@ class PostControllerTest {
 
     @MockitoBean
     PostService postService;
-
-
 }
