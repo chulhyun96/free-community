@@ -24,7 +24,9 @@ public class PostController {
             @RequestPart("file") List<MultipartFile> images,
             @RequestPart("post") PostCreateRequest request,
             @RequestHeader("X-User-Id") Long userId) {
+
         Post post = postService.create(images, request, userId);
+
         return ResponseEntity.ok(PostCreateResponse.from(post));
     }
 
@@ -32,10 +34,12 @@ public class PostController {
     public ResponseEntity<?> readById(
             @PathVariable Long postId,
             @RequestHeader("X-User-Id") Long userId) {
+
         Post post = postService.readById(postId, userId);
         Long currentViewCount = postService.getCurrentViewCount(postId);
         User user = postService.getUser(userId);
         Category category = postService.getCategory(post.getCategoryId());
+
         return ResponseEntity.ok(PostReadResponse.from(post, currentViewCount, user.getNickname(), category.getName()));
     }
 }

@@ -33,7 +33,6 @@ public class PostService {
     }
 
     public Post readById(Long postId, Long userId) {
-        // 게시글 찾고
         PostEntity entity = postRepository.findById(postId).orElseThrow();
         viewCountService.increase(postId, userId);
         return entity.toModel();
