@@ -1,4 +1,4 @@
-package com.cheolhyeon.free_commnunity_1.post.repository;
+package com.cheolhyeon.free_commnunity_1.post.image.formatter;
 
 
 import org.springframework.web.multipart.MultipartFile;

@@ -1,0 +1,23 @@
+### User Create
+POST localhost:8080/users
+Content-Type: application/json
+
+{
+  "nickname" : "newUsss"
+}
+
+### User Read
+GET localhost:8080/users/1
+
+### User Update
+PATCH localhost:8080/users/1
+Content-Type: application/json
+
+{
+  "nickname": "update"
+}
+
+
+
+
+

@@ -11,7 +11,7 @@ import java.util.List;
 
 @Component
 @RequiredArgsConstructor
-public class ImageLocalSaveFormatter implements ImageStrategy {
+public class LocalImageFormatter implements ImageStrategy {
     private final static String BASE_PATH = "/Users/cheolhyeon/desktop"; // S3 이용시 S3 엔드포인트로 변경
     private final ObjectMapper mapper;
 

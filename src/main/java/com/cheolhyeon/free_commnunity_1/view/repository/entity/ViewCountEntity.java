@@ -11,12 +11,12 @@ import lombok.*;
 @AllArgsConstructor
 @Table(name = "post_view_count")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PostViewCountEntity {
+public class ViewCountEntity {
     @Id
     private Long postId;
     private Long viewCount;
 
-    public static PostViewCountEntity init(Long postId, Long viewCount) {
-        return new PostViewCountEntity(postId, viewCount);
+    public static ViewCountEntity init(Long postId, Long viewCount) {
+        return new ViewCountEntity(postId, viewCount);
     }
 }

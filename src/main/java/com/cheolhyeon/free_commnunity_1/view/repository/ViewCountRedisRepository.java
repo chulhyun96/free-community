@@ -6,11 +6,10 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @RequiredArgsConstructor
-public class ViewRedisRepository {
+public class ViewCountRedisRepository {
     private final static String KEY = "post:%s:view_count";
     private final StringRedisTemplate redisTemplate;
 
-    // 현재 조회수 가져오는 메서드
     public Long read(Long postId) {
         String result = redisTemplate.opsForValue().get(generateKey(postId));
         return result == null ? 0L : Long.parseLong(result);
