@@ -1,14 +1,11 @@
 package com.cheolhyeon.free_commnunity_1.user.repository;
 
-import com.cheolhyeon.free_commnunity_1.user.controller.request.UserUpdateRequest;
-import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.annotation.Commit;
 
 import java.util.Optional;
 
@@ -22,7 +19,7 @@ class UserRepositoryTest {
     private UserRepository userRepository;
 
     @Test
-    @DisplayName("유저 저장 및 조회 테스트")
+    @DisplayName("유저 저장 및 조회")
     void saveAndFindUser() {
         // given
         UserEntity entity = UserEntity.builder()
@@ -41,4 +38,5 @@ class UserRepositoryTest {
         assertThat(foundEntity.get().getNickname()).isEqualTo(savedEntity.getNickname());
         assertThat(foundEntity.get().getActionPoint()).isEqualTo(savedEntity.getActionPoint());
     }
+
 }
