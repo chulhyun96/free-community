@@ -1,11 +1,14 @@
 package com.cheolhyeon.free_commnunity_1.post.controller;
 
+import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.LocalImageFormatter;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
+import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -106,5 +110,42 @@ class PostControllerTest {
         PostCreateResponse response = mapper.readValue(result.getResponse().getContentAsString(), PostCreateResponse.class);
         //then
         assertThat(response.getImageUrl()).isEqualTo("[]");
+    }
+    @Test
+    @DisplayName("게시글 조회")
+    void readByPostId() throws Exception {
+        //given
+        Long userId = 1L;
+        Long postId = 1L;
+        Post post = Post.builder()
+                .id(1L)
+                .categoryId(1L)
+                .title("제목")
+                .content("내용")
+                .imageUrl("[]")
+                .build();
+        given(postService.readById(postId, userId)).willReturn(post);
+        given(postService.getCurrentViewCount(postId)).willReturn(100L);
+        User user = User.builder()
+                .id(userId)
+                .nickname("기존 유저")
+                .build();
+        given(postService.getUser(userId)).willReturn(user);
+        given(postService.getCategory(1L)).willReturn(Category.GENERAL);
+        //when
+        MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("X-User-Id", userId))
+                .andExpect(status().isOk())
+                .andReturn();
+        String contentAsString = result.getResponse().getContentAsString();
+        PostReadResponse response = mapper.readValue(contentAsString, PostReadResponse.class);
+        //then
+        assertThat(response.getTitle()).isEqualTo(post.getTitle());
+        assertThat(response.getContent()).isEqualTo(post.getContent());
+        assertThat(response.getNickname()).isEqualTo(user.getNickname());
+        assertThat(response.getImageUrl()).isEqualTo(post.getImageUrl());
+        assertThat(response.getCategoryName()).isEqualTo(Category.GENERAL.getName());
+        assertThat(response.getViewCount()).isEqualTo(100);
     }
 }
