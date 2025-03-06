@@ -49,7 +49,9 @@ public class CommentEntity {
                 .build();
     }
 
-    public void initForRootComment() {
-        this.parentCommentId = this.commentId;
+    public void assignSelfAsParentIfRoot(Comment parent) {
+        if (parent == null) {
+            this.parentCommentId = this.commentId;
+        }
     }
 }
