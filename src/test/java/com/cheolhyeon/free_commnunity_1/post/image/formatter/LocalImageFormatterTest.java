@@ -16,8 +16,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 class LocalImageFormatterTest {
     private final static String BASE_PATH = "/Users/cheolhyeon/desktop"; // S3 이용시 S3 엔드포인트로 변경
+
     private LocalImageFormatter formatter;
-    ObjectMapper mapper;
+    private ObjectMapper mapper;
+
+
     @BeforeEach
     void setUp() {
         mapper = new ObjectMapper();
