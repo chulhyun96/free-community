@@ -9,6 +9,7 @@ import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.LocalImageFormatter;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -111,6 +112,7 @@ class PostControllerTest {
         //then
         assertThat(response.getImageUrl()).isEqualTo("[]");
     }
+
     @Test
     @DisplayName("게시글 조회")
     void readByPostId() throws Exception {

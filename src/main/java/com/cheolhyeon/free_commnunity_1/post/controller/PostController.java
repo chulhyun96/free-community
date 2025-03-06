@@ -45,13 +45,13 @@ public class PostController {
     }
 
     @PatchMapping("/posts/{postId}")
-    public ResponseEntity<?> create(
-            @RequestPart("file") List<MultipartFile> images,
+    public ResponseEntity<?> update(
+            @RequestPart("newImages") List<MultipartFile> newImages,
+            @RequestPart("deletedImages") List<String> deletedImages,
             @RequestPart("post") PostUpdateRequest request,
             @RequestHeader("X-User-Id") Long userId) {
 
-        postService.update(images, request, userId);
-
+        postService.update(newImages, deletedImages, request, userId);
         return null;
     }
 
