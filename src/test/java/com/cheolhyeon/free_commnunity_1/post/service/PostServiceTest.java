@@ -6,13 +6,11 @@ import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateReques
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
-import com.cheolhyeon.free_commnunity_1.post.image.formatter.LocalImageFormatter;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -27,7 +25,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.List.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
