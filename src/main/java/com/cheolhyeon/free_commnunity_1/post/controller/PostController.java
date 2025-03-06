@@ -2,6 +2,7 @@ package com.cheolhyeon.free_commnunity_1.post.controller;
 
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
+import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
@@ -42,4 +43,16 @@ public class PostController {
 
         return ResponseEntity.ok(PostReadResponse.from(post, currentViewCount, user.getNickname(), category.getName()));
     }
+
+    @PatchMapping("/posts/{postId}")
+    public ResponseEntity<?> create(
+            @RequestPart("file") List<MultipartFile> images,
+            @RequestPart("post") PostUpdateRequest request,
+            @RequestHeader("X-User-Id") Long userId) {
+
+        postService.update(images, request, userId);
+
+        return null;
+    }
+
 }

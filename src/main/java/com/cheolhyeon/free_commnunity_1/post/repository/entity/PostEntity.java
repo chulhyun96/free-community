@@ -1,16 +1,14 @@
 package com.cheolhyeon.free_commnunity_1.post.repository.entity;
 
 
-import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
+import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
-import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
+@ToString
 @Getter
 @Entity
 @Builder
@@ -52,5 +50,13 @@ public class PostEntity {
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();
+    }
+
+    public void update(String images, PostUpdateRequest request) {
+        this.imageUrl = images;
+        this.id = request.getPostId();
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.updatedAt = LocalDateTime.now();
     }
 }
