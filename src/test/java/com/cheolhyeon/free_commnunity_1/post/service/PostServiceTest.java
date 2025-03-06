@@ -1,8 +1,8 @@
 package com.cheolhyeon.free_commnunity_1.post.service;
 
-import com.cheolhyeon.free_commnunity_1.category.service.CategoryService;
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
+import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
@@ -11,6 +11,7 @@ import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,6 +31,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
     @Mock
@@ -37,9 +39,6 @@ class PostServiceTest {
 
     @Mock
     ImageStrategy imageStrategy;
-
-    @Mock
-    CategoryService categoryService;
 
     @Mock
     ViewCountService viewCountService;
@@ -55,19 +54,20 @@ class PostServiceTest {
 
     final Long userId = 1L;
     final Long postId = 1L;
-    final String localImages = "[\"/Users/cheolhyeon/desktop/test1.jpg\",\"/Users/cheolhyeon/desktop/test2.jpg\"]";
+    final String localImages1 = "[\"/Users/cheolhyeon/desktop/test1.jpg\",\"/Users/cheolhyeon/desktop/test2.jpg\"]";
+    final String localImages2 = "[\"/Users/cheolhyeon/desktop/update1.jpg\",\"/Users/cheolhyeon/desktop/update2.jpg\"]";
 
     @BeforeEach
     void setUp() {
         request = new PostCreateRequest(1L, "제목", "내용");
-        post = Post.from(request, userId, localImages);
+        post = Post.from(request, userId, localImages1);
     }
     @Test
     @DisplayName("PostService Create 메서드 테스트")
     void create() {
         // Given
         given(userService.readById(anyLong())).willReturn(createUserWithOnlyId(1L));
-        given(imageStrategy.formatToSave(anyList())).willReturn(localImages);
+        given(imageStrategy.formatToSave(anyList())).willReturn(localImages1);
 
         ArgumentCaptor<PostEntity> postEntityCaptor = ArgumentCaptor.forClass(PostEntity.class);
         given(postRepository.save(postEntityCaptor.capture())).willReturn(PostEntity.from(post));
@@ -100,6 +100,220 @@ class PostServiceTest {
         assertThat(readPost.getUserId()).isEqualTo(userId);
         assertThat(readPost.getImageUrl()).isEqualTo(response.getImageUrl());
         assertThat(response.getViewCount()).isEqualTo(1L);
+    }
+
+    @Test
+    @DisplayName("Post Update 기존의 이미지만 수정한 경우")
+    void updatePostWithoutPostTitleAndContent() {
+        //given
+        MockMultipartFile updateFile1 = new MockMultipartFile("file", "update1.jpg", "image/jpeg", "update1.jpg".getBytes());
+        MockMultipartFile updateFile2 = new MockMultipartFile("file", "update2.jpg", "image/jpeg", "update2.jpg".getBytes());
+        List<MultipartFile> updateImagesList = List.of(updateFile1, updateFile2);
+        PostUpdateRequest request = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("")
+                .content("")
+                .build();
+
+        given(postRepository.findByIdAndUserId(anyLong(),anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+        given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(localImages2);
+        //when
+        Post update = postService.update(updateImagesList, null, request, userId);
+        log.info("update: {}", update.toString());
+        //then
+        assertThat(update.getId()).isEqualTo(request.getPostId());
+        assertThat(update.getTitle()).isEqualTo(request.getTitle());
+        assertThat(update.getContent()).isEqualTo(request.getContent());
+        assertThat(update.getUserId()).isEqualTo(userId);
+        assertThat(update.getImageUrl()).isEqualTo("[\"/Users/cheolhyeon/desktop/update1.jpg\",\"/Users/cheolhyeon/desktop/update2.jpg\"]");
+    }
+    @Test
+    @DisplayName("Post Update 게시글만 수정한 경우")
+    void updatePostWithoutImages() {
+        //given
+        PostUpdateRequest request = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("수정합니다")
+                .content("이미지의 변경없이 이미지는 그대로 두고 변경을 원합니다")
+                .build();
+        given(postRepository.findByIdAndUserId(anyLong(),anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+        given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(localImages2);
+        //when
+        Post update = postService.update(null, null, request, userId);
+        log.info("update: {}", update.toString());
+        //then
+        assertThat(update.getId()).isEqualTo(request.getPostId());
+        assertThat(update.getTitle()).isEqualTo(request.getTitle());
+        assertThat(update.getContent()).isEqualTo(request.getContent());
+        assertThat(update.getUserId()).isEqualTo(userId);
+        assertThat(update.getImageUrl()).isEqualTo("[\"/Users/cheolhyeon/desktop/update1.jpg\",\"/Users/cheolhyeon/desktop/update2.jpg\"]");
+    }
+    @Test
+    @DisplayName("기존 이미지가 있는 상태에서 새로운 이미지의 변경없이 null로 들어오는 경우")
+    void testKeepExistingImage() {
+        //given
+        final String BASE_PATH = "/Users/cheolhyeon/desktop";
+
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+
+        String existingImages = List.of(BASE_PATH + "/image1.jpg", BASE_PATH + "/image2.jpg", BASE_PATH + "/image3.jpg").toString();
+        given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(existingImages);
+
+        PostUpdateRequest updateRequest = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("")
+                .content("")
+                .build();
+        //when
+        Post updatePost = postService.update(null, null, updateRequest, userId);
+        log.info("update: {}", updatePost.toString());
+        //then
+        assertThat(updatePost).isNotNull();
+        assertThat(updatePost.getImageUrl()).isEqualTo(existingImages);
+    }
+    @Test
+    @DisplayName("기존 이미지가 없는 상태에서 새로운 이미지가 들어온 경우")
+    void addNewImagesWithoutExistingImages() {
+        //given
+        final String BASE_PATH = "/Users/cheolhyeon/desktop";
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+
+
+        List<MultipartFile> updateImagesList = getMockMultipartFileThree();
+        String newImages = getExistingImages(BASE_PATH);
+
+        given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(newImages);
+        PostUpdateRequest updateRequest = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("")
+                .content("")
+                .build();
+        //when
+        Post updatePost = postService.update(updateImagesList, null, updateRequest, userId);
+        log.info("update: {}", updatePost.toString());
+        //then
+        assertThat(updatePost).isNotNull();
+        assertThat(updatePost.getImageUrl()).isEqualTo(newImages);
+    }
+
+    @Test
+    @DisplayName("기존 이미지가 있는 상태에서 새로운 이미지가 추가가 될 경우 ex) 기존 이미지 2장, 새로운 이미지 3장 + 총 5장이 저장되어야 하는 경우")
+    void addNewImagesToExistingImages() {
+        //given
+        final String BASE_PATH = "/Users/cheolhyeon/desktop";
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+
+
+        List<MultipartFile> updateImages = getMockMultipartFileThree();
+        String result = List.of(
+                        BASE_PATH + "/image1.jpg",
+                        BASE_PATH + "/image2.jpg",
+                        BASE_PATH + "/update1.jpg",
+                        BASE_PATH + "/update2.jpg",
+                        BASE_PATH + "/update3.jpg")
+                .toString();
+        given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(result);
+        PostUpdateRequest updateRequest = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("")
+                .content("")
+                .build();
+        //when
+        Post update = postService.update(updateImages, null, updateRequest, userId);
+        log.info("update: {}", update.toString());
+        //then
+        assertThat(update).isNotNull();
+        assertThat(update.getImageUrl()).isEqualTo(result);
+    }
+    @Test
+    @DisplayName("사용자가 기존 이미지를 완전히 비운 상태에서 새로운 이미지를 추가한 경우")
+    void deleteAllAndAddNewImages() {
+        //given
+        final String BASE_PATH = "/Users/cheolhyeon/desktop";
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+
+        List<String> existingImages = List.of(BASE_PATH + "/image1.jpg", BASE_PATH + "/image1.jpg");
+        List<MultipartFile> updateImages = getMockMultipartFileThree();
+        String result = List.of(
+                        BASE_PATH + "/update1.jpg",
+                        BASE_PATH + "/update2.jpg",
+                        BASE_PATH + "/update3.jpg")
+                .toString();
+        given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(result);
+        PostUpdateRequest updateRequest = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("")
+                .content("")
+                .build();
+        //when
+        Post update = postService.update(updateImages, existingImages, updateRequest, userId);
+        log.info("update: {}", update.toString());
+        //then
+        assertThat(update).isNotNull();
+        assertThat(update.getImageUrl()).isEqualTo(result);
+    }
+
+    @Test
+    @DisplayName("사용자가 기존 2장의 이미지 중에서 1장을 삭제하고 새로운 1장을 추가한 경우")
+    void deleteSomeAndAddNewImages() {
+        final String BASE_PATH = "/Users/cheolhyeon/desktop";
+
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(PostEntity.from(post)));
+
+        String existingImages = getExistingImages(BASE_PATH); // 기존 이미지 JSON 가져오기
+        List<String> deletedImages = List.of(BASE_PATH + "/image1.jpg"); // 삭제할 이미지
+        List<MultipartFile> updateImages = getMockMultipartFileThree(); // 새 이미지 3개
+
+        // 기대하는 최종 이미지 결과
+        String result = List.of(
+                BASE_PATH + "/update1.jpg",
+                BASE_PATH + "/image1.jpg"
+        ).toString();
+
+        // ✅ 수정: `anyList()` & `eq(existingImages)` 사용
+        given(imageStrategy.formatToSave(anyList(), anyList(), anyString()))
+                .willReturn(result);
+
+        PostUpdateRequest updateRequest = PostUpdateRequest.builder()
+                .postId(1L)
+                .title("")
+                .content("")
+                .build();
+
+        // when
+        Post actualResult = postService.update(updateImages, deletedImages, updateRequest, userId);
+
+        // then
+        log.info("Expected: {}", result);
+        log.info("Actual: {}", actualResult);
+        assertThat(actualResult).isNotNull();
+        assertThat(actualResult.getImageUrl()).isEqualTo(result);
+    }
+    private String getExistingImages(String BASE_PATH) {
+        return List.of(BASE_PATH + "/image1.jpg", BASE_PATH + "/image1.jpg").toString();
+    }
+
+    private List<MultipartFile> getMockMultipartFileThree() {
+        MockMultipartFile updateFile1 = new MockMultipartFile(
+                "file",
+                "update1.jpg",
+                "image/jpeg",
+                "update1.jpg".getBytes()
+        );
+        MockMultipartFile updateFile2 = new MockMultipartFile(
+                "file",
+                "update2.jpg",
+                "image/jpeg",
+                "update2.jpg".getBytes()
+        );
+        MockMultipartFile updateFile3 = new MockMultipartFile(
+                "file",
+                "update3.jpg",
+                "image/jpeg",
+                "update2.jpg".getBytes()
+        );
+        return List.of(updateFile1, updateFile2, updateFile3);
     }
 
     private List<MultipartFile> createImagesOnlyTwo() {
