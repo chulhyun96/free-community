@@ -24,9 +24,7 @@ public class CommentService {
         CommentEntity entity = commentRepository.save(
                 CommentEntity.from(request, parent)
         );
-        if (parent == null) {
-            entity.initForRootComment();
-        }
+        entity.assignSelfAsParentIfRoot(parent);
         return entity.toModel();
     }
 
