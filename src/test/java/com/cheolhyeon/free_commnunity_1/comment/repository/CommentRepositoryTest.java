@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -23,7 +23,7 @@ class CommentRepositoryTest {
         //given
         CommentCreateRequest request = new CommentCreateRequest(1L, null, 1L, "안녕하세요");
         CommentEntity entity = commentRepository.save(CommentEntity.from(request, null));
-        entity.initForRootComment();
+        entity.assignSelfAsParentIfRoot(null);
         //when
         CommentEntity findEntity = commentRepository.findById(entity.getParentCommentId()).orElseThrow();
         //then
