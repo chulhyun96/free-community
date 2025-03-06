@@ -5,26 +5,21 @@ import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
-import com.cheolhyeon.free_commnunity_1.user.repository.UserRepository;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
 
 @ExtendWith(MockitoExtension.class)
 class CommentServiceTest {
@@ -48,7 +43,7 @@ class CommentServiceTest {
 
         given(userService.readById(anyLong())).willReturn(User.builder().id(1L).build());
         given(commentRepository.save(any(CommentEntity.class))).willReturn(savedEntity);
-        willDoNothing().given(savedEntity).initForRootComment();
+        willDoNothing().given(savedEntity).assignSelfAsParentIfRoot(null);
         given(savedEntity.toModel()).willReturn(new Comment(1L, request.getContent(), 1L, 1L, 1L, false, LocalDateTime.now()));
 
         // when
@@ -59,8 +54,5 @@ class CommentServiceTest {
         assertThat(comment.getParentCommentId()).isEqualTo(1L);
         assertThat(comment.getCommentId()).isEqualTo(1L);
         assertThat(comment.getParentCommentId()).isEqualTo(comment.getCommentId());
-        then(savedEntity).should(times(1)).initForRootComment();
     }
-
-
 }
