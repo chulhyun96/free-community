@@ -3,6 +3,7 @@ package com.cheolhyeon.free_commnunity_1.post.service;
 import com.cheolhyeon.free_commnunity_1.category.service.CategoryService;
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
+import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
@@ -45,5 +46,13 @@ public class PostService {
     }
     public Category getCategory(Long categoryId) {
         return categoryService.findById(categoryId);
+    }
+
+    public Post update(List<MultipartFile> newImages, List<String> deletedImages, PostUpdateRequest request, Long userId) {
+        PostEntity entity = postRepository.findByIdAndUserId(request.getPostId(), userId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        String jsonAsString = imageStrategy.formatToSave(newImages, deletedImages, entity.getImageUrl());
+        entity.update(jsonAsString, request);
+        return entity.toModel();
     }
 }
