@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -25,23 +26,27 @@ public class LocalImageFormatter implements ImageStrategy {
     }
 
     @Override
-    public String formatToSave(List<MultipartFile> images, List<String> deletedImages, String existingImages) {
+    public String formatToSave(List<MultipartFile> newImages, List<String> deletedImages, String existingImages) {
         // 기존 이미지 JSON을 List<String>으로 변환
         List<String> existingImagePaths = parseJsonToList(existingImages);
 
-        // 1. 기존 이미지에서 삭제할 이미지 제거
-        if (deletedImages != null && !deletedImages.isEmpty()) {
-            existingImagePaths.removeAll(deletedImages);
-        }
+        // 1. 기존 이미지에서 삭제할 이미지 제거, 삭제할 이미지가 없을 경우 리스트로 변환 후 제거
+        List<String> safeDeletedImages = Optional.ofNullable(deletedImages).orElseGet(List::of);
+        existingImagePaths.removeAll(safeDeletedImages);
 
-        // 2. 새로운 이미지 추가
-        if (images != null && !images.isEmpty()) {
-            List<String> newImagePaths = getJsonPathsList(images);
+        // 2. 새로운 이미지 추가, newImages가 null일 경우 빈 리스트로 변환 후 새로운 이미지 추가
+        List<MultipartFile> safeNewImages = Optional.ofNullable(newImages).orElseGet(List::of);
+        if (notEmpty(safeNewImages)) {
+            List<String> newImagePaths = getJsonPathsList(safeNewImages);
             existingImagePaths.addAll(newImagePaths);
         }
 
         // 3. 최종 리스트 JSON으로 변환하여 반환
         return toJson(existingImagePaths);
+    }
+
+    private boolean notEmpty(List<MultipartFile> images) {
+        return !images.isEmpty();
     }
 
     private List<String> getJsonPathsList(List<MultipartFile> images) {
