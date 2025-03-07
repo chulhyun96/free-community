@@ -21,7 +21,7 @@ public class LocalImageFormatter implements ImageStrategy {
     private final ObjectMapper mapper;
 
     @Override
-    public String formatToSave(List<MultipartFile> images) throws JsonProcessingException {
+    public String formatToSave(List<MultipartFile> images)  {
         if (images == null || images.isEmpty()) {
             return "[]";
         }
@@ -30,7 +30,7 @@ public class LocalImageFormatter implements ImageStrategy {
 
 
     @Override
-    public String formatToSave(List<MultipartFile> newImages, List<String> deletedImages, String existingImages) throws JsonProcessingException {
+    public String formatToSave(List<MultipartFile> newImages, List<String> deletedImages, String existingImages)  {
         // 1.기존 이미지 String 타입의 JSON 포맷을 List<String>으로 변환
         List<String> existingImagePaths = parseJsonToList(existingImages);
 
@@ -59,11 +59,19 @@ public class LocalImageFormatter implements ImageStrategy {
                 .toList();
     }
 
-    private List<String> parseJsonToList(String json) throws JsonProcessingException {
-        return mapper.readValue(json, new TypeReference<>() {});
+    private List<String> parseJsonToList(String json)  {
+        try {
+            return mapper.readValue(json, new TypeReference<>() {});
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private String toJson(List<String> paths) throws JsonProcessingException {
-        return mapper.writeValueAsString(paths);
+    private String toJson(List<String> paths)  {
+        try {
+            return mapper.writeValueAsString(paths);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

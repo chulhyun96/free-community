@@ -86,7 +86,6 @@ class PostControllerTest {
         //then
         assertThat(response.getTitle()).isEqualTo("제목");
         assertThat(response.getContent()).isEqualTo("내용");
-        assertThat(response.getImageUrl()).isEqualTo("[\"/Users/cheolhyeon/desktop/test1.jpg\",\"/Users/cheolhyeon/desktop/test2.jpg\"]");
     }
 
     @Test

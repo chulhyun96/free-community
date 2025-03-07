@@ -10,15 +10,14 @@ import java.time.Duration;
 @Service
 @RequiredArgsConstructor
 public class ViewCountService {
+    private static final int BACK_UP_BATCH_SIZE = 50;
+    private static final Duration TTL = Duration.ofMinutes(3);
     private final ViewCountRedisRepository viewCountRedisRepository;
     private final ViewCountBackUpService viewCountBackUpService;
     private final ViewCountDistributedLockRepository viewCountDistributedLockRepository;
 
-    private static final int BACK_UP_BATCH_SIZE = 50;
-    private static final Duration TTL = Duration.ofMinutes(3);
-
     public Long increase(Long postId, Long userId) {
-        if(!viewCountDistributedLockRepository.lock(postId, userId, TTL)) {
+        if (!viewCountDistributedLockRepository.lock(postId, userId, TTL)) {
             return viewCountRedisRepository.read(postId);
         }
 

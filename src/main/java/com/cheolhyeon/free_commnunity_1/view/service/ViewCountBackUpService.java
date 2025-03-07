@@ -17,7 +17,8 @@ public class ViewCountBackUpService {
         int result = viewCountBackUpRepository.updateViewCount(postId, viewCount);
         if (result == 0) {
             viewCountBackUpRepository.findById(postId)
-                    .ifPresentOrElse(ignored -> {},
+                    .ifPresentOrElse(ignored -> {
+                            },
                             () -> viewCountBackUpRepository.save(ViewCountEntity.init(postId, viewCount))
                     );
         }

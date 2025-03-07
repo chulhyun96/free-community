@@ -9,9 +9,8 @@ import java.time.Duration;
 @Repository
 @RequiredArgsConstructor
 public class ViewCountDistributedLockRepository {
-    private final StringRedisTemplate redisTemplate;
-
     private final static String KEY = "post:%s:user:%s:lock";
+    private final StringRedisTemplate redisTemplate;
 
     public boolean lock(Long postId, Long userId, Duration ttl) {
         String key = generateKey(postId, userId);

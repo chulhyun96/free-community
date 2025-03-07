@@ -8,6 +8,7 @@ import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadRespons
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +26,7 @@ public class PostController {
     public ResponseEntity<PostCreateResponse> create(
             @RequestPart("file") List<MultipartFile> images,
             @RequestPart("post") PostCreateRequest request,
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader("X-User-Id") Long userId) throws JsonProcessingException {
 
         Post post = postService.create(images, request, userId);
 
@@ -41,6 +42,7 @@ public class PostController {
         Long currentViewCount = postService.getCurrentViewCount(postId);
         User user = postService.getUser(userId);
         Category category = postService.getCategory(post.getCategoryId());
+//        commentService.read()
 
         return ResponseEntity.ok(PostReadResponse.from(post, currentViewCount, user.getNickname(), category.getName()));
     }
@@ -51,7 +53,7 @@ public class PostController {
             @RequestPart("deletedImages") List<String> deletedImages,
             @RequestPart("post") PostUpdateRequest request,
             @PathVariable("postId") Long postId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader("X-User-Id") Long userId) throws JsonProcessingException {
 
         postService.update(newImages, deletedImages, request, postId, userId);
         return ResponseEntity.ok(HttpStatus.OK);

@@ -29,7 +29,7 @@ public class UserController {
 
     @PatchMapping("/users/{userId}")
     public ResponseEntity<?> updateById(@PathVariable Long userId, @RequestBody UserUpdateRequest request) {
-        User user = userService.updateById(userId,request);
+        User user = userService.updateById(userId, request);
         return ResponseEntity.ok(UserReadResponse.from(user));
     }
 }
