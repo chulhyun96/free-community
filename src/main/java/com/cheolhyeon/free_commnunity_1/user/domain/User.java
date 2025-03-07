@@ -15,7 +15,7 @@ public class User {
     private Long id;
     private String nickname;
     private Long actionPoint;
-//    private MyHistory myHistory;
+    //    private MyHistory myHistory;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
