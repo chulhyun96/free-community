@@ -11,6 +11,7 @@ import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.verify;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -62,9 +64,10 @@ class PostServiceTest {
         request = new PostCreateRequest(1L, "제목", "내용");
         post = Post.from(request, userId, localImages1);
     }
+
     @Test
     @DisplayName("PostService Create 메서드 테스트")
-    void create() {
+    void create() throws JsonProcessingException {
         // Given
         given(userService.readById(anyLong())).willReturn(createUserWithOnlyId(1L));
         given(imageStrategy.formatToSave(anyList())).willReturn(localImages1);
@@ -104,53 +107,55 @@ class PostServiceTest {
 
     @Test
     @DisplayName("Post Update 기존의 이미지만 수정한 경우")
-    void updatePostWithoutPostTitleAndContent() {
+    void updatePostWithoutPostTitleAndContent() throws JsonProcessingException {
         //given
         MockMultipartFile updateFile1 = new MockMultipartFile("file", "update1.jpg", "image/jpeg", "update1.jpg".getBytes());
         MockMultipartFile updateFile2 = new MockMultipartFile("file", "update2.jpg", "image/jpeg", "update2.jpg".getBytes());
         List<MultipartFile> updateImagesList = List.of(updateFile1, updateFile2);
         PostUpdateRequest request = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("")
                 .content("")
                 .build();
 
-        given(postRepository.findByIdAndUserId(anyLong(),anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
         given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(localImages2);
+
         //when
-        Post update = postService.update(updateImagesList, null, request, userId);
+        Post update = postService.update(updateImagesList, null, request, userId, postId);
         log.info("update: {}", update.toString());
+
         //then
-        assertThat(update.getId()).isEqualTo(request.getPostId());
         assertThat(update.getTitle()).isEqualTo(request.getTitle());
         assertThat(update.getContent()).isEqualTo(request.getContent());
         assertThat(update.getUserId()).isEqualTo(userId);
         assertThat(update.getImageUrl()).isEqualTo("[\"/Users/cheolhyeon/desktop/update1.jpg\",\"/Users/cheolhyeon/desktop/update2.jpg\"]");
     }
+
     @Test
     @DisplayName("Post Update 게시글만 수정한 경우")
-    void updatePostWithoutImages() {
+    void updatePostWithoutImages() throws JsonProcessingException {
         //given
         PostUpdateRequest request = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("수정합니다")
                 .content("이미지의 변경없이 이미지는 그대로 두고 변경을 원합니다")
                 .build();
-        given(postRepository.findByIdAndUserId(anyLong(),anyLong())).willReturn(Optional.of(PostEntity.from(post)));
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
         given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(localImages2);
+
         //when
-        Post update = postService.update(null, null, request, userId);
+        Post update = postService.update(null, null, request, userId, postId);
         log.info("update: {}", update.toString());
+
         //then
-        assertThat(update.getId()).isEqualTo(request.getPostId());
         assertThat(update.getTitle()).isEqualTo(request.getTitle());
         assertThat(update.getContent()).isEqualTo(request.getContent());
         assertThat(update.getUserId()).isEqualTo(userId);
         assertThat(update.getImageUrl()).isEqualTo("[\"/Users/cheolhyeon/desktop/update1.jpg\",\"/Users/cheolhyeon/desktop/update2.jpg\"]");
     }
+
     @Test
     @DisplayName("기존 이미지가 있는 상태에서 새로운 이미지의 변경없이 null로 들어오는 경우")
-    void testKeepExistingImage() {
+    void testKeepExistingImage() throws JsonProcessingException {
         //given
         final String BASE_PATH = "/Users/cheolhyeon/desktop";
 
@@ -160,20 +165,20 @@ class PostServiceTest {
         given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(existingImages);
 
         PostUpdateRequest updateRequest = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("")
                 .content("")
                 .build();
         //when
-        Post updatePost = postService.update(null, null, updateRequest, userId);
+        Post updatePost = postService.update(null, null, updateRequest, userId, postId);
         log.info("update: {}", updatePost.toString());
         //then
         assertThat(updatePost).isNotNull();
         assertThat(updatePost.getImageUrl()).isEqualTo(existingImages);
     }
+
     @Test
     @DisplayName("기존 이미지가 없는 상태에서 새로운 이미지가 들어온 경우")
-    void addNewImagesWithoutExistingImages() {
+    void addNewImagesWithoutExistingImages() throws JsonProcessingException {
         //given
         final String BASE_PATH = "/Users/cheolhyeon/desktop";
         given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
@@ -184,12 +189,11 @@ class PostServiceTest {
 
         given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(newImages);
         PostUpdateRequest updateRequest = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("")
                 .content("")
                 .build();
         //when
-        Post updatePost = postService.update(updateImagesList, null, updateRequest, userId);
+        Post updatePost = postService.update(updateImagesList, null, updateRequest, userId, postId);
         log.info("update: {}", updatePost.toString());
         //then
         assertThat(updatePost).isNotNull();
@@ -198,7 +202,7 @@ class PostServiceTest {
 
     @Test
     @DisplayName("기존 이미지가 있는 상태에서 새로운 이미지가 추가가 될 경우 ex) 기존 이미지 2장, 새로운 이미지 3장 + 총 5장이 저장되어야 하는 경우")
-    void addNewImagesToExistingImages() {
+    void addNewImagesToExistingImages() throws JsonProcessingException {
         //given
         final String BASE_PATH = "/Users/cheolhyeon/desktop";
         given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
@@ -214,20 +218,20 @@ class PostServiceTest {
                 .toString();
         given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(result);
         PostUpdateRequest updateRequest = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("")
                 .content("")
                 .build();
         //when
-        Post update = postService.update(updateImages, null, updateRequest, userId);
+        Post update = postService.update(updateImages, null, updateRequest, userId, postId);
         log.info("update: {}", update.toString());
         //then
         assertThat(update).isNotNull();
         assertThat(update.getImageUrl()).isEqualTo(result);
     }
+
     @Test
     @DisplayName("사용자가 기존 이미지를 완전히 비운 상태에서 새로운 이미지를 추가한 경우")
-    void deleteAllAndAddNewImages() {
+    void deleteAllAndAddNewImages() throws JsonProcessingException {
         //given
         final String BASE_PATH = "/Users/cheolhyeon/desktop";
         given(postRepository.findByIdAndUserId(anyLong(), anyLong())).willReturn(Optional.of(PostEntity.from(post)));
@@ -241,12 +245,11 @@ class PostServiceTest {
                 .toString();
         given(imageStrategy.formatToSave(any(), any(), anyString())).willReturn(result);
         PostUpdateRequest updateRequest = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("")
                 .content("")
                 .build();
         //when
-        Post update = postService.update(updateImages, existingImages, updateRequest, userId);
+        Post update = postService.update(updateImages, existingImages, updateRequest, userId, postId);
         log.info("update: {}", update.toString());
         //then
         assertThat(update).isNotNull();
@@ -255,34 +258,30 @@ class PostServiceTest {
 
     @Test
     @DisplayName("사용자가 기존 2장의 이미지 중에서 1장을 삭제하고 새로운 1장을 추가한 경우")
-    void deleteSomeAndAddNewImages() {
+    void deleteSomeAndAddNewImages() throws JsonProcessingException {
         final String BASE_PATH = "/Users/cheolhyeon/desktop";
 
         given(postRepository.findByIdAndUserId(anyLong(), anyLong()))
                 .willReturn(Optional.of(PostEntity.from(post)));
 
-        String existingImages = getExistingImages(BASE_PATH); // 기존 이미지 JSON 가져오기
         List<String> deletedImages = List.of(BASE_PATH + "/image1.jpg"); // 삭제할 이미지
         List<MultipartFile> updateImages = getMockMultipartFileThree(); // 새 이미지 3개
 
-        // 기대하는 최종 이미지 결과
         String result = List.of(
                 BASE_PATH + "/update1.jpg",
                 BASE_PATH + "/image1.jpg"
         ).toString();
 
-        // ✅ 수정: `anyList()` & `eq(existingImages)` 사용
         given(imageStrategy.formatToSave(anyList(), anyList(), anyString()))
                 .willReturn(result);
 
         PostUpdateRequest updateRequest = PostUpdateRequest.builder()
-                .postId(1L)
                 .title("")
                 .content("")
                 .build();
 
         // when
-        Post actualResult = postService.update(updateImages, deletedImages, updateRequest, userId);
+        Post actualResult = postService.update(updateImages, deletedImages, updateRequest, userId, postId);
 
         // then
         log.info("Expected: {}", result);
@@ -290,6 +289,7 @@ class PostServiceTest {
         assertThat(actualResult).isNotNull();
         assertThat(actualResult.getImageUrl()).isEqualTo(result);
     }
+
     private String getExistingImages(String BASE_PATH) {
         return List.of(BASE_PATH + "/image1.jpg", BASE_PATH + "/image1.jpg").toString();
     }
@@ -314,6 +314,28 @@ class PostServiceTest {
                 "update2.jpg".getBytes()
         );
         return List.of(updateFile1, updateFile2, updateFile3);
+    }
+    @Test
+    @DisplayName("Post Delete")
+    void deletePost() {
+        //given
+        given(postRepository.findByIdAndUserId(anyLong(), anyLong()))
+                .willReturn(Optional.of(PostEntity.from(post)));
+
+        ArgumentCaptor<PostEntity> postCaptor = ArgumentCaptor.forClass(PostEntity.class);
+
+        //when
+        postService.delete(postId, userId);
+
+        //then
+        verify(postRepository).delete(postCaptor.capture());
+        PostEntity value = postCaptor.getValue();
+
+        assertThat(value).isNotNull();
+        assertThat(value.getUserId()).isEqualTo(userId);
+        assertThat(value.getTitle()).isEqualTo(post.getTitle());
+        assertThat(value.getContent()).isEqualTo(post.getContent());
+        assertThat(value.getCategoryId()).isEqualTo(Category.GENERAL.getId());
     }
 
     private List<MultipartFile> createImagesOnlyTwo() {

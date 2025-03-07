@@ -18,7 +18,7 @@ public class PostReadResponse {
     private String imageUrl;
     private String categoryName;
     private Long viewCount;
-//    private String comment;
+    private String comment;
     private LocalDateTime updatedAt;
 
     public static PostReadResponse from(Post post, Long currentViewCount, String writer, String categoryName) {

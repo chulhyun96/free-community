@@ -11,6 +11,7 @@ import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,7 +27,7 @@ public class PostService {
     private final ViewCountService viewCountService;
     private final UserService userService;
 
-    public Post create(List<MultipartFile> images, PostCreateRequest request, Long userId) {
+    public Post create(List<MultipartFile> images, PostCreateRequest request, Long userId) throws JsonProcessingException {
         User user = userService.readById(userId);
         String jsonAsString = imageStrategy.formatToSave(images);
         Post post = Post.from(request, user.getId(), jsonAsString);
@@ -38,21 +39,30 @@ public class PostService {
         viewCountService.increase(postId, userId);
         return entity.toModel();
     }
+
     public Long getCurrentViewCount(Long postId) {
         return viewCountService.getCurrentViewCount(postId);
     }
+
     public User getUser(Long userId) {
         return userService.readById(userId);
     }
+
     public Category getCategory(Long categoryId) {
         return categoryService.findById(categoryId);
     }
 
-    public Post update(List<MultipartFile> newImages, List<String> deletedImages, PostUpdateRequest request, Long userId) {
-        PostEntity entity = postRepository.findByIdAndUserId(request.getPostId(), userId)
+    public Post update(List<MultipartFile> newImages, List<String> deletedImages, PostUpdateRequest request, Long userId, Long postId) throws JsonProcessingException {
+        PostEntity entity = postRepository.findByIdAndUserId(postId, userId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         String jsonAsString = imageStrategy.formatToSave(newImages, deletedImages, entity.getImageUrl());
         entity.update(jsonAsString, request);
         return entity.toModel();
+    }
+
+    public void delete(Long postId, Long userId) {
+        PostEntity entity = postRepository.findByIdAndUserId(postId, userId)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        postRepository.delete(entity);
     }
 }
