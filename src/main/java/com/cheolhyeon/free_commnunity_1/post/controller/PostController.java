@@ -9,6 +9,7 @@ import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -21,7 +22,7 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/posts")
-    public ResponseEntity<?> create(
+    public ResponseEntity<PostCreateResponse> create(
             @RequestPart("file") List<MultipartFile> images,
             @RequestPart("post") PostCreateRequest request,
             @RequestHeader("X-User-Id") Long userId) {
@@ -32,7 +33,7 @@ public class PostController {
     }
 
     @GetMapping("/posts/{postId}")
-    public ResponseEntity<?> readById(
+    public ResponseEntity<PostReadResponse> readById(
             @PathVariable Long postId,
             @RequestHeader("X-User-Id") Long userId) {
 
@@ -45,14 +46,22 @@ public class PostController {
     }
 
     @PatchMapping("/posts/{postId}")
-    public ResponseEntity<?> update(
+    public ResponseEntity<HttpStatus> update(
             @RequestPart("newImages") List<MultipartFile> newImages,
             @RequestPart("deletedImages") List<String> deletedImages,
             @RequestPart("post") PostUpdateRequest request,
+            @PathVariable("postId") Long postId,
             @RequestHeader("X-User-Id") Long userId) {
 
-        postService.update(newImages, deletedImages, request, userId);
-        return null;
+        postService.update(newImages, deletedImages, request, postId, userId);
+        return ResponseEntity.ok(HttpStatus.OK);
     }
 
+    @DeleteMapping("/posts/{postId}")
+    public ResponseEntity<HttpStatus> delete(
+            @PathVariable Long postId,
+            @RequestHeader("X-User-Id") Long userId) {
+        postService.delete(postId, userId);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
 }
