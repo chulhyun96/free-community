@@ -2,6 +2,7 @@ package com.cheolhyeon.free_commnunity_1.post.controller;
 
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
+import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
@@ -27,8 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -88,6 +88,7 @@ class PostControllerTest {
         assertThat(response.getContent()).isEqualTo("내용");
         assertThat(response.getImageUrl()).isEqualTo("[\"/Users/cheolhyeon/desktop/test1.jpg\",\"/Users/cheolhyeon/desktop/test2.jpg\"]");
     }
+
     @Test
     @DisplayName("게시글 저장 with No Image")
     void savePost_noImage() throws Exception {
@@ -149,5 +150,32 @@ class PostControllerTest {
         assertThat(response.getImageUrl()).isEqualTo(post.getImageUrl());
         assertThat(response.getCategoryName()).isEqualTo(Category.GENERAL.getName());
         assertThat(response.getViewCount()).isEqualTo(100);
+    }
+
+    @Test
+    @DisplayName("Post Update")
+    void updateById() throws JsonProcessingException {
+        //given
+        MockMultipartFile file1 = new MockMultipartFile("file", "test1.jpg", "image/jpeg", "test".getBytes());
+        MockMultipartFile file2 = new MockMultipartFile("file", "test2.jpg", "image/jpeg", "test".getBytes());
+        List<String> deletedImages = List.of();
+        List<MultipartFile> images = List.of(file1, file2);
+        String newImages = formatter.formatToSave(images);
+        PostUpdateRequest request = PostUpdateRequest.builder()
+                .title("업데이트")
+                .content("test")
+                .build();
+
+        given(postService.update(anyList(), anyList(), any(PostUpdateRequest.class), anyLong(), anyLong()))
+                .willReturn(Post.builder().id(1L).title(request.getTitle()).content(request.getContent()).imageUrl(newImages).build());
+        //when
+        Post update = postService.update(images, deletedImages, request, 1L, 1L);
+        System.out.println("update = " + update);
+        //then
+        assertThat(update).isNotNull();
+        assertThat(update.getTitle()).isEqualTo(request.getTitle());
+        assertThat(update.getContent()).isEqualTo(request.getContent());
+        assertThat(update.getImageUrl()).isEqualTo(newImages);
+
     }
 }
