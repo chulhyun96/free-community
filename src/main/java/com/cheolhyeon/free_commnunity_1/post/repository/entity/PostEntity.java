@@ -54,7 +54,6 @@ public class PostEntity {
 
     public void update(String images, PostUpdateRequest request) {
         this.imageUrl = images;
-        this.id = request.getPostId();
         this.title = request.getTitle();
         this.content = request.getContent();
         this.updatedAt = LocalDateTime.now();
