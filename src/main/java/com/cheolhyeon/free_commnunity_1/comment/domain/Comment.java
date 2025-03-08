@@ -34,22 +34,22 @@ public class Comment {
     }
 
     // O(n^2)
-    private static List<Comment> getCommentsOfTree(List<CommentEntity> commentEntities, List<Comment> root) {
+    private static List<Comment> getCommentsOfTree(List<CommentEntity> commentEntities, List<Comment> parent) {
         for (CommentEntity commentEntity : commentEntities) {
             Comment comment = commentEntity.toModel();
 
-            if (comment.isRoot()) {
-                root.add(comment);
+            if (!comment.isRoot()) {
+                parent.add(comment);
                 continue;
             }
 
-            for (Comment rootComment : root) {
+            for (Comment rootComment : parent) {
                 if (rootComment.getCommentId().equals(comment.getParentCommentId())) {
                     rootComment.getReplies().add(comment);
                 }
             }
         }
-        return root;
+        return parent;
     }
 
     // O(n)
@@ -59,25 +59,19 @@ public class Comment {
                 .map(CommentEntity::toModel)
                 .toList();
 
-        // 2. 부모 ID를 키로 하고, 해당하는 자식 댓글 리스트를 값으로 저장하는 맵 생성 → O(n)
         Map<Long, Comment> commentMap = comments.stream()
                 .collect(Collectors.toMap(Comment::getCommentId, comment -> comment));
 
-        // ✅ 3. 부모 댓글 리스트 생성
-        List<Comment> rootComments = new ArrayList<>();
+        Map<Boolean, List<Comment>> partitioned = comments.stream()
+                .collect(Collectors.partitioningBy(Comment::isRoot));
 
-        // ✅ 4. 부모-자식 관계 설정 (O(n))
-        for (Comment comment : comments) {
-            if (comment.isRoot()) {
-                rootComments.add(comment);
-            } else {
-                // ✅ O(1)로 부모 댓글을 찾아서 대댓글 추가
-                Comment parent = commentMap.get(comment.getParentCommentId());
-                if (parent != null) {
-                    parent.getReplies().add(comment);
-                }
-            }
-        }
+        List<Comment> rootComments = partitioned.get(true);
+        List<Comment> childComments = partitioned.get(false);
+
+        childComments.forEach(comment -> {
+            Comment parent = commentMap.get(comment.getParentCommentId());
+            if (parent != null) parent.getReplies().add(comment);
+        });
         return rootComments;
     }
 
