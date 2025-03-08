@@ -18,12 +18,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.BDDMockito.*;
+import static org.mockito.Mockito.mock;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -35,30 +36,44 @@ class CommentServiceTest {
     UserService userService;
 
     @Mock
-    CommentEntity savedEntity;  // ✅ Mock 객체로 변경
+    CommentEntity savedEntity;
 
     @InjectMocks
     CommentService commentService;
 
     @Test
-    @DisplayName("루트 댓글일 경우 자신의 commentId가 parentCommentId로 할당 된다.")
-    void ThisCommentIsRoot() {
-        //given
-        CommentCreateRequest request = new CommentCreateRequest(1L, null, 1L, "안녕하세요");
+    @DisplayName("ParentComment 생성")
+    void createCommentSuccessfully() {
+        // Given
+        Long userId = 1L;
+        Long postId = 1L;
 
-        given(userService.readById(anyLong())).willReturn(User.builder().id(1L).build());
-        given(commentRepository.save(any(CommentEntity.class))).willReturn(savedEntity);
-        willDoNothing().given(savedEntity).assignSelfAsParentIfRoot(null);
-        given(savedEntity.toModel()).willReturn(new Comment(1L, request.getContent(), 1L, 1L, 1L, false, LocalDateTime.now(), null));
+        CommentCreateRequest parentComment = CommentCreateRequest.builder()
+                .parentCommentId(null) // 부모 댓글 없음
+                .userId(userId)
+                .content("안녕하세요")
+                .build();
 
-        // when
-        Comment comment = commentService.create(request);
+        User mockUser = mock(User.class);
+        CommentEntity savedEntity = mock(CommentEntity.class);
+        Comment expectedComment = mock(Comment.class);
 
-        // then
-        assertThat(comment.getParentCommentId()).isEqualTo(1L);
-        assertThat(comment.getCommentId()).isEqualTo(1L);
-        assertThat(comment.getParentCommentId()).isEqualTo(comment.getCommentId());
+        // Mock 설정
+        given(userService.readById(userId)).willReturn(mockUser); // User 객체 반환
+        given(commentRepository.save(any(CommentEntity.class))).willReturn(savedEntity); // CommentEntity 객체 반환
+        given(savedEntity.toModel()).willReturn(expectedComment); // toModel()이 Comment를 반환
+
+        // When
+        Comment comment = commentService.create(postId, parentComment);
+
+        // Then
+        assertThat(comment).isEqualTo(expectedComment);
+        then(userService).should().readById(userId);
+        then(commentRepository).should().save(any(CommentEntity.class));
+        then(savedEntity).should().assignSelfAsParentIfRoot(null);
+        then(savedEntity).should().toModel();
     }
+
 
     @Test
     @DisplayName("Comment Read")

@@ -21,11 +21,11 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
 
-    public Comment create(CommentCreateRequest request) {
+    public Comment create(Long postId, CommentCreateRequest request) {
         userService.readById(request.getUserId());
         Comment parent = findParentComment(request);
         CommentEntity entity = commentRepository.save(
-                CommentEntity.from(request, parent)
+                CommentEntity.from(request, parent, postId)
         );
         entity.assignSelfAsParentIfRoot(parent);
         return entity.toModel();

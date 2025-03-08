@@ -24,8 +24,8 @@ class CommentRepositoryTest {
     @DisplayName("Root 댓글일 insert 쿼리 발생 후 update 쿼리 발생함")
     void insertAndUpdateParentComment() {
         //given
-        CommentCreateRequest request = new CommentCreateRequest(1L, null, 1L, "안녕하세요");
-        CommentEntity entity = commentRepository.save(CommentEntity.from(request, null));
+        CommentCreateRequest request = new CommentCreateRequest(1L, 1L, "안녕하세요");
+        CommentEntity entity = commentRepository.save(CommentEntity.from(request, null, 1L));
         entity.assignSelfAsParentIfRoot(null);
         //when
         CommentEntity findEntity = commentRepository.findById(entity.getParentCommentId()).orElseThrow();
