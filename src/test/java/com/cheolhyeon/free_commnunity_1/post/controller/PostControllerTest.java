@@ -1,6 +1,8 @@
 package com.cheolhyeon.free_commnunity_1.post.controller;
 
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
+import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadResponse;
+import com.cheolhyeon.free_commnunity_1.comment.service.CommentService;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
@@ -25,6 +27,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,6 +50,9 @@ class PostControllerTest {
 
     @MockitoBean
     PostService postService;
+
+    @MockitoBean
+    CommentService commentService;
 
     @Mock
     ImageStrategy formatter;
@@ -126,22 +133,32 @@ class PostControllerTest {
                 .content("내용")
                 .imageUrl("[]")
                 .build();
+
         given(postService.readById(postId, userId)).willReturn(post);
         given(postService.getCurrentViewCount(postId)).willReturn(100L);
+
         User user = User.builder()
                 .id(userId)
                 .nickname("기존 유저")
                 .build();
+
         given(postService.getUser(userId)).willReturn(user);
         given(postService.getCategory(1L)).willReturn(Category.GENERAL);
+
+        List<CommentReadResponse> comments = createRootCommentWithReplies("RootContent", "ReplyContent");
+        given(commentService.read(postId)).willReturn(comments);
+
+        given(commentService.getCommentsCount(comments)).willReturn(comments.size());
         //when
         MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", userId))
                 .andExpect(status().isOk())
                 .andReturn();
+
         String contentAsString = result.getResponse().getContentAsString();
         PostReadResponse response = mapper.readValue(contentAsString, PostReadResponse.class);
+
         //then
         assertThat(response.getTitle()).isEqualTo(post.getTitle());
         assertThat(response.getContent()).isEqualTo(post.getContent());
@@ -149,7 +166,11 @@ class PostControllerTest {
         assertThat(response.getImageUrl()).isEqualTo(post.getImageUrl());
         assertThat(response.getCategoryName()).isEqualTo(Category.GENERAL.getName());
         assertThat(response.getViewCount()).isEqualTo(100);
+        assertThat(comments).hasSize(1);
+        assertThat(comments.get(0).getParentCommentId()).isEqualTo(1L);
+        assertThat(comments.get(0).getReplies().get(0).getCommentId()).isEqualTo(2L);
     }
+
 
     @Test
     @DisplayName("Post Update")
@@ -175,6 +196,27 @@ class PostControllerTest {
         assertThat(update.getTitle()).isEqualTo(request.getTitle());
         assertThat(update.getContent()).isEqualTo(request.getContent());
         assertThat(update.getImageUrl()).isEqualTo(newImages);
+    }
 
+
+    private List<CommentReadResponse> createRootCommentWithReplies(String rootContent, String replycContent) {
+        List<CommentReadResponse> response = new ArrayList<>();
+        CommentReadResponse root = CommentReadResponse.builder()
+                .commentId(1L)
+                .parentCommentId(1L)
+                .content(rootContent)
+                .createdAt(LocalDateTime.of(2024, 1, 1, 1, 1))
+                .replies(new ArrayList<>())
+                .build();
+        CommentReadResponse reply = CommentReadResponse.builder()
+                .parentCommentId(1L)
+                .commentId(2L)
+                .content(replycContent)
+                .createdAt(LocalDateTime.of(2024, 1, 1, 1, 2))
+                .replies(List.of())
+                .build();
+        root.getReplies().add(reply);
+        response.add(root);
+        return response;
     }
 }
