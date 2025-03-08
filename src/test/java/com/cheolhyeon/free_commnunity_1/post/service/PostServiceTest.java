@@ -95,7 +95,7 @@ class PostServiceTest {
         given(viewCountService.increase(postId, userId)).willReturn(1L);
         //when
         Post readPost = postService.readById(postId, userId);
-        PostReadResponse response = PostReadResponse.from(readPost, 1L, "User", Category.GENERAL.getName());
+        PostReadResponse response = PostReadResponse.from(readPost, 1L, "User", Category.GENERAL.getName(), null, 0);
         //then
 
         assertThat(readPost.getTitle()).isEqualTo(response.getTitle());
