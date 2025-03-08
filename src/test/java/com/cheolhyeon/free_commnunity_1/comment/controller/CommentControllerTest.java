@@ -30,7 +30,7 @@ class CommentControllerTest {
 
     @Test
     @DisplayName("Comment 작성")
-    void createComment() throws Exception {
+    void create() throws Exception {
         //given
         CommentCreateRequest request =
                 new CommentCreateRequest(null, 1L, "테스트 댓글 작성");
