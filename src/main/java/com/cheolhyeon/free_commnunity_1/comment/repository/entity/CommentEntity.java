@@ -1,6 +1,7 @@
 package com.cheolhyeon.free_commnunity_1.comment.repository.entity;
 
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
+import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import jakarta.persistence.*;
 import lombok.*;
@@ -54,5 +55,10 @@ public class CommentEntity {
         if (parent == null) {
             this.parentCommentId = this.commentId;
         }
+    }
+
+    public void update(CommentUpdateRequest request) {
+        this.content = request.getContent();
+        this.updatedAt = LocalDateTime.now();
     }
 }
