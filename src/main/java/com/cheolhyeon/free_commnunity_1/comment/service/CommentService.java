@@ -2,6 +2,7 @@ package com.cheolhyeon.free_commnunity_1.comment.service;
 
 import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadResponse;
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
+import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
@@ -52,5 +53,11 @@ public class CommentService {
     public int getCommentsCount(List<CommentReadResponse> comments) {
         return comments.size() + comments.stream()
                 .mapToInt(comment -> comment.getReplies().size()).sum();
+    }
+
+    public void update(Long postId, Long commentId, CommentUpdateRequest request) {
+        CommentEntity findEntity = commentRepository.findByPostIdAndCommentId(postId, commentId)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        findEntity.update(request);
     }
 }
