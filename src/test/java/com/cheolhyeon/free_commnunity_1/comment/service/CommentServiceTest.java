@@ -18,12 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 @Slf4j
@@ -90,6 +89,54 @@ class CommentServiceTest {
         assertThat(result.get(0).getCommentId()).isEqualTo(result.get(0).getReplies().get(0).getParentCommentId());
         assertThat(result.get(1).getCommentId()).isEqualTo(result.get(1).getReplies().get(0).getParentCommentId());
         assertThat(result.get(2).getCommentId()).isEqualTo(result.get(2).getReplies().get(0).getParentCommentId());
+    }
+
+    @Test
+    @DisplayName("리스트가 비어있을 때")
+    void getCommentsCountWithEmpty() {
+        //given
+        List<CommentReadResponse> comments = new ArrayList<>();
+        //when
+        int commentsCount = commentService.getCommentsCount(comments);
+        //then
+        assertThat(commentsCount).isZero();
+    }
+
+    @Test
+    @DisplayName("댓글이 1개일때")
+    void getCommentsCount_One() {
+        //given
+        List<CommentReadResponse> comments = new ArrayList<>();
+        comments.add(CommentReadResponse.builder()
+                .parentCommentId(1L)
+                .commentId(1L)
+                .content("안녕하세요")
+                .build());
+        //when
+        int commentsCount = commentService.getCommentsCount(comments);
+        //then
+        assertThat(commentsCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("댓글이 2개일때")
+    void getCommentsCount_Two() {
+        //given
+        List<CommentReadResponse> comments = new ArrayList<>();
+        comments.add(CommentReadResponse.builder()
+                .parentCommentId(1L)
+                .commentId(1L)
+                .content("안녕하세요")
+                .build());
+        comments.add(CommentReadResponse.builder()
+                .parentCommentId(1L)
+                .commentId(2L)
+                .content("안녕하세요")
+                .build());
+        //when
+        int commentsCount = commentService.getCommentsCount(comments);
+        //then
+        assertThat(commentsCount).isEqualTo(2);
     }
 
     private List<CommentEntity> createCommentEntity() {
