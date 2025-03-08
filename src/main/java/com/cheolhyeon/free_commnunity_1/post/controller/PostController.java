@@ -1,6 +1,8 @@
 package com.cheolhyeon.free_commnunity_1.post.controller;
 
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
+import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadResponse;
+import com.cheolhyeon.free_commnunity_1.comment.service.CommentService;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
@@ -21,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+    private final CommentService commentService;
 
     @PostMapping("/posts")
     public ResponseEntity<PostCreateResponse> create(
@@ -42,9 +45,16 @@ public class PostController {
         Long currentViewCount = postService.getCurrentViewCount(postId);
         User user = postService.getUser(userId);
         Category category = postService.getCategory(post.getCategoryId());
-//        commentService.read()
+        List<CommentReadResponse> comments = commentService.read(postId);
 
-        return ResponseEntity.ok(PostReadResponse.from(post, currentViewCount, user.getNickname(), category.getName()));
+        return ResponseEntity.ok(PostReadResponse.from(
+                post,
+                currentViewCount,
+                user.getNickname(),
+                category.getName(),
+                comments,
+                commentService.getCommentsCount(comments)
+        ));
     }
 
     @PatchMapping("/posts/{postId}")
