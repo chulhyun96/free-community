@@ -29,5 +29,4 @@ public class CommentController {
         commentService.update(postId, commentId, request);
         return ResponseEntity.ok(HttpStatus.OK);
     }
-
 }
