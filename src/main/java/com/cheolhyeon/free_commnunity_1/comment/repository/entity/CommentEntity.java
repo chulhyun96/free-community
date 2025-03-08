@@ -26,10 +26,10 @@ public class CommentEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public static CommentEntity from(CommentCreateRequest request, Comment parentComment) {
+    public static CommentEntity from(CommentCreateRequest request, Comment parentComment, Long postId) {
         CommentEntity entity = new CommentEntity();
         entity.parentCommentId = parentComment == null ? 0L : parentComment.getParentCommentId();
-        entity.postId = request.getPostId();
+        entity.postId = postId;
         entity.userId = request.getUserId();
         entity.content = request.getContent();
         entity.deleted = false;
