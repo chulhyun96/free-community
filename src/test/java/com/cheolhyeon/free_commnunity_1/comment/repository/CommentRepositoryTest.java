@@ -83,4 +83,11 @@ class CommentRepositoryTest {
         assertThat(result.get(1).getContent()).isEqualTo(comment2.getContent());
         assertThat(result.get(2).getContent()).isEqualTo(comment3.getContent());
     }
+    @Test
+    void findByPostIdAndCommentId() {
+        CommentEntity findComment = commentRepository.findByPostIdAndCommentId(1L, 2L)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        assertThat(findComment.getParentCommentId()).isEqualTo(1L);
+        assertThat(findComment.getCommentId()).isEqualTo(2L);
+    }
 }
