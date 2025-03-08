@@ -1,5 +1,6 @@
 package com.cheolhyeon.free_commnunity_1.comment.service;
 
+import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadResponse;
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
@@ -8,6 +9,8 @@ import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 import static java.util.function.Predicate.not;
 
@@ -38,5 +41,16 @@ public class CommentService {
                 .filter(not(Comment::getDeleted))
                 .filter(Comment::isRoot)
                 .orElseThrow();
+    }
+
+    public List<CommentReadResponse> read(Long postId) {
+        List<CommentEntity> commentEntities = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
+        return CommentReadResponse.from(commentsOfTree);
+    }
+
+    public int getCommentsCount(List<CommentReadResponse> comments) {
+        return comments.size() + comments.stream()
+                .mapToInt(comment -> comment.getReplies().size()).sum();
     }
 }
