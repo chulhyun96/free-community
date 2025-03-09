@@ -38,6 +38,18 @@ public class CommentEntity {
         entity.updatedAt = LocalDateTime.now();
         return entity;
     }
+    public static CommentEntity of(Comment comment) {
+        return CommentEntity.builder()
+                .parentCommentId(comment.getParentCommentId())
+                .commentId(comment.getCommentId())
+                .postId(comment.getPostId())
+                .userId(comment.getUserId())
+                .content(comment.getContent())
+                .deleted(comment.getDeleted())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
 
     public Comment toModel() {
         return Comment.builder()
@@ -48,6 +60,7 @@ public class CommentEntity {
                 .content(content)
                 .deleted(deleted)
                 .createdAt(createdAt)
+                .updatedAt(updatedAt)
                 .build();
     }
 
@@ -61,4 +74,5 @@ public class CommentEntity {
         this.content = request.getContent();
         this.updatedAt = LocalDateTime.now();
     }
+
 }

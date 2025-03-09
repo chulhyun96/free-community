@@ -24,6 +24,7 @@ public class Comment {
     private Long userId;
     private Boolean deleted;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     @Builder.Default
     private List<Comment> replies = new ArrayList<>();
@@ -75,11 +76,13 @@ public class Comment {
         return rootComments;
     }
 
+
     public boolean isRoot() {
         return Objects.equals(parentCommentId, commentId);
     }
 
-    public boolean delete() {
-        return deleted = true;
+    public void delete() {
+        deleted = true;
     }
+
 }

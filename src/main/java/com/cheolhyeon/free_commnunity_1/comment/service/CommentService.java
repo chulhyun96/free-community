@@ -35,7 +35,7 @@ public class CommentService {
     private Comment findParentComment(CommentCreateRequest request) {
         Long parentCommentId = request.getParentCommentId();
         if (parentCommentId == null) {
-            return null; // 루트 댓글이므로 상위 댓글 없음
+            return null;
         }
         return commentRepository.findById(parentCommentId)
                 .map(CommentEntity::toModel)
@@ -44,6 +44,7 @@ public class CommentService {
                 .orElseThrow();
     }
 
+    @Transactional(readOnly = true)
     public List<CommentReadResponse> read(Long postId) {
         List<CommentEntity> commentEntities = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
         List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
@@ -59,5 +60,34 @@ public class CommentService {
         CommentEntity findEntity = commentRepository.findByPostIdAndCommentId(postId, commentId)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         findEntity.update(request);
+    }
+
+    public void delete(Long postId, Long commentId) {
+        commentRepository.findByPostIdAndCommentId(postId, commentId)
+                .map(CommentEntity::toModel)
+                .filter(not(Comment::getDeleted))
+                .ifPresent(comment -> {
+                    if (hasChildren(comment)) {
+                        comment.delete();
+                        commentRepository.save(CommentEntity.of(comment));
+                    } else {
+                        delete(comment);
+                    }
+                });
+    }
+
+    private boolean hasChildren(Comment comment) {
+        return commentRepository.countBy(comment.getPostId(), comment.getCommentId(), 2L) == 2;
+    }
+
+    private void delete(Comment comment) {
+        commentRepository.delete(CommentEntity.of(comment));
+        if (!comment.isRoot()) {
+            commentRepository.findById(comment.getParentCommentId())
+                    .map(CommentEntity::toModel)
+                    .filter(Comment::getDeleted)
+                    .filter(not(this::hasChildren))
+                    .ifPresent(this::delete);
+        }
     }
 }

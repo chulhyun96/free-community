@@ -29,4 +29,12 @@ public class CommentController {
         commentService.update(postId, commentId, request);
         return ResponseEntity.ok(HttpStatus.OK);
     }
+
+    @DeleteMapping("/posts{postId}/comments/{commentId}")
+    public ResponseEntity<HttpStatus> delete(
+            @PathVariable Long postId,
+            @PathVariable Long commentId) {
+        commentService.delete(postId, commentId);
+        return ResponseEntity.ok(HttpStatus.OK);
+    }
 }
