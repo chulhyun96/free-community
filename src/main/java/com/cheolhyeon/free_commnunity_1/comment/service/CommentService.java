@@ -68,9 +68,11 @@ public class CommentService {
                 .filter(not(Comment::getDeleted))
                 .ifPresent(comment -> {
                     if (hasChildren(comment)) {
+                        // 자식을 가진 루트 댓글일 경우 delete flag와 내용만 업데이트
                         comment.delete();
                         commentRepository.save(CommentEntity.of(comment));
                     } else {
+                        // 자식이 없는 경우 -> 즉 루트 댓글이거나, 하위 댓글이거나
                         delete(comment);
                     }
                 });
@@ -81,7 +83,9 @@ public class CommentService {
     }
 
     private void delete(Comment comment) {
+        // 자식이 없는 루트 댓글일 경우 삭제
         commentRepository.delete(CommentEntity.of(comment));
+        // 하위 댓글일 경우
         if (!comment.isRoot()) {
             commentRepository.findById(comment.getParentCommentId())
                     .map(CommentEntity::toModel)

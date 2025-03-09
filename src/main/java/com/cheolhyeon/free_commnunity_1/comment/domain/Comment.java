@@ -83,6 +83,7 @@ public class Comment {
 
     public void delete() {
         deleted = true;
+        content = "사용자 요청에 의해 삭제된 댓글입니다.";
     }
 
 }
