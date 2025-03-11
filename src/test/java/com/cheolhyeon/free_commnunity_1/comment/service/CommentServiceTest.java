@@ -48,7 +48,7 @@ class CommentServiceTest {
         Long postId = 1L;
 
         CommentCreateRequest parentComment = CommentCreateRequest.builder()
-                .parentCommentId(null) // 부모 댓글 없음
+                .parentCommentId(null)
                 .userId(userId)
                 .content("안녕하세요")
                 .build();
@@ -57,10 +57,9 @@ class CommentServiceTest {
         CommentEntity savedEntity = mock(CommentEntity.class);
         Comment expectedComment = mock(Comment.class);
 
-        // Mock 설정
-        given(userService.readById(userId)).willReturn(mockUser); // User 객체 반환
-        given(commentRepository.save(any(CommentEntity.class))).willReturn(savedEntity); // CommentEntity 객체 반환
-        given(savedEntity.toModel()).willReturn(expectedComment); // toModel()이 Comment를 반환
+        given(userService.readById(userId)).willReturn(mockUser);
+        given(commentRepository.save(any(CommentEntity.class))).willReturn(savedEntity);
+        given(savedEntity.toModel()).willReturn(expectedComment);
 
         // When
         Comment comment = commentService.create(postId, parentComment);
