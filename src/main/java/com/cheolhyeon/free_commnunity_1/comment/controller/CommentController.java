@@ -30,7 +30,7 @@ public class CommentController {
         return ResponseEntity.ok(HttpStatus.OK);
     }
 
-    @DeleteMapping("/posts{postId}/comments/{commentId}")
+    @DeleteMapping("/posts/{postId}/comments/{commentId}")
     public ResponseEntity<HttpStatus> delete(
             @PathVariable Long postId,
             @PathVariable Long commentId) {
