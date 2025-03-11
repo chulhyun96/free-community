@@ -17,8 +17,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @Slf4j
@@ -68,4 +68,18 @@ class CommentControllerTest {
         verify(commentService, times(1)).update(eq(1L), eq(1L), any(CommentUpdateRequest.class));
     }
 
+    @Test
+    @DisplayName("Delete Comment")
+    void deleteRootCommentWithoutChildren() throws Exception {
+        Long postId = 1L;
+        Long commentId = 1L;
+
+        // when & then
+        mockMvc.perform(delete("/posts/{postId}/comments/{commentId}", postId, commentId))
+                .andExpect(status().isOk())
+                .andDo(print());
+
+        // verify
+        verify(commentService, times(1)).delete(postId, commentId);
+    }
 }
