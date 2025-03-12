@@ -13,19 +13,26 @@ public class CommentLikeService {
     private final CommentLikeQueryRedisRepository commentLikeQueryRedisRepository;
 
     @Transactional
-    public void toggleLike(Long userId, Long commentId) {
-        boolean result = commentLikeQueryRedisRepository.isLikedByUserIdAndCommentId(userId, commentId);
-        if (result) {
-            commentLikeRedisRepository.decrement(commentId);
-            commentLikeQueryRedisRepository.delete(userId, commentId);
-            return;
+    public Long toggleLike(Long userId, Long commentId) {
+        boolean isAlreadyLiked = commentLikeQueryRedisRepository.isLikedByUserIdAndCommentId(userId, commentId);
+        if (isAlreadyLiked) {
+            return unlikeComment(userId, commentId);
         }
-        commentLikeRedisRepository.increment(commentId);
-        commentLikeQueryRedisRepository.insert(userId, commentId);
+        return likeComment(userId, commentId);
     }
 
     @Transactional(readOnly = true)
     public Long getCurrentCommentLikeCount(Long commentId) {
         return commentLikeRedisRepository.getCurrentCommentLikeCount(commentId);
+    }
+
+    private Long likeComment(Long userId, Long commentId) {
+        commentLikeQueryRedisRepository.insert(userId, commentId);
+        return commentLikeRedisRepository.increment(commentId);
+    }
+
+    private Long unlikeComment(Long userId, Long commentId) {
+        commentLikeQueryRedisRepository.delete(userId, commentId);
+        return commentLikeRedisRepository.decrement(commentId);
     }
 }

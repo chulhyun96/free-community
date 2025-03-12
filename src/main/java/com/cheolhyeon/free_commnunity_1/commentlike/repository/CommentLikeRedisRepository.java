@@ -7,17 +7,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class CommentLikeRedisRepository {
-    private static final String KEY = "comments_like:%s:count";
+    private static final String KEY = "comment:%s:like_count";
     private final StringRedisTemplate commentLikeRedisTemplate;
 
-    public void increment(Long commentId) {
+    public Long increment(Long commentId) {
         String key = generateKey(commentId);
-        commentLikeRedisTemplate.opsForValue().increment(key);
+        return commentLikeRedisTemplate.opsForValue().increment(key);
     }
 
-    public void decrement(Long commentId) {
+    public Long decrement(Long commentId) {
         String key = generateKey(commentId);
-        commentLikeRedisTemplate.opsForValue().decrement(key);
+        return commentLikeRedisTemplate.opsForValue().decrement(key);
     }
 
     public Long getCurrentCommentLikeCount(Long commentId) {
