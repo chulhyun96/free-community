@@ -12,6 +12,6 @@ public interface ViewCountBackUpRepository extends JpaRepository<ViewCountEntity
                     "where post_id = :postId and view_count < :viewCount",
             nativeQuery = true
     )
-    @Modifying
+    @Modifying(clearAutomatically = true)
     int updateViewCount(@Param("postId") Long postId, @Param("viewCount") Long viewCount);
 }
