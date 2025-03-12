@@ -15,5 +15,4 @@ public class CategoryEntity {
     private Long id;
     @Enumerated(EnumType.STRING)
     private Category name;
-
 }

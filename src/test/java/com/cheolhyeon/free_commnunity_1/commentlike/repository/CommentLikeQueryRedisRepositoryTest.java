@@ -10,7 +10,6 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -43,6 +42,7 @@ class CommentLikeQueryRedisRepositoryTest {
         assertThat(result).isTrue();
         then(commentLikeRedisTemplate).should(times(1)).hasKey(key);
     }
+
     @Test
     @DisplayName("특정 유저가 특정 댓글에 좋아요를 처음 눌렀다")
     void returnFalseWhenUserClickedLikeSecond() {
@@ -64,7 +64,7 @@ class CommentLikeQueryRedisRepositoryTest {
         //when
         commentLikeQueryRedisRepository.insert(userId, commentId);
         //then
-        then(valueOperations).should(times(1)).set(key,"");
+        then(valueOperations).should(times(1)).set(key, "");
     }
 
     @Test

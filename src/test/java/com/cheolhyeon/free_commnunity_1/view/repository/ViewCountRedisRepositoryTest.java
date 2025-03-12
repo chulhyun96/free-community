@@ -16,8 +16,7 @@ import static org.mockito.BDDMockito.given;
 class ViewCountRedisRepositoryTest {
 
     @Mock
-    StringRedisTemplate redisTemplate;
-
+    StringRedisTemplate viewCountRedisTemplate;
 
     @Mock
     ValueOperations<String, String> valueOperations;
@@ -32,7 +31,7 @@ class ViewCountRedisRepositoryTest {
     @DisplayName("특정 게시글 조회수 조회")
     void readPostViewCount() {
         // Given
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(viewCountRedisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.get(key)).willReturn("100");
 
         // When
@@ -46,19 +45,19 @@ class ViewCountRedisRepositoryTest {
     @DisplayName("특정 게시글 조회 시 조회수가 null일 경우")
     void readPostViewCountNull() {
         //given
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(viewCountRedisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.get(key)).willReturn(null);
         //when
         Long result = viewCountRedisRepository.read(postId);
         //then
-        assertThat(result).isEqualTo(0L);
+        assertThat(result).isZero();
     }
 
     @Test
     @DisplayName("특정 게시글 조회시 조회수 증가")
     void doTest() {
         //given
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(viewCountRedisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.increment(key)).willReturn(101L);
         //when
         Long increase = viewCountRedisRepository.increase(postId);
@@ -71,7 +70,7 @@ class ViewCountRedisRepositoryTest {
     @DisplayName("특정 게시글 조회 시 첫 조회일 경우")
     void readPostViewCountIsFirst() {
         //given
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(viewCountRedisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.get(key)).willReturn(null);
         given(valueOperations.increment(key)).willReturn(1L);
 
@@ -80,14 +79,14 @@ class ViewCountRedisRepositoryTest {
         Long increase = viewCountRedisRepository.increase(postId);
 
         //then
-        assertThat(result).isEqualTo(0L);
+        assertThat(result).isZero();
         assertThat(increase).isEqualTo(1L);
     }
     @Test
     @DisplayName("특정 게시글 5번 조회")
     void readPostViewCountConstituent() {
         //given
-        given(redisTemplate.opsForValue()).willReturn(valueOperations);
+        given(viewCountRedisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.get(key)).willReturn("50");
         given(valueOperations.increment(key)).willReturn(55L);
 

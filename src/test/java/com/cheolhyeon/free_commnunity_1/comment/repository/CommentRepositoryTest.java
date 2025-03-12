@@ -91,10 +91,10 @@ class CommentRepositoryTest {
     }
     @Test
     void findByPostIdAndCommentId() {
-        CommentEntity findComment = commentRepository.findByPostIdAndCommentId(1L, 2L)
+        CommentEntity findComment = commentRepository.findByPostIdAndCommentId(5L, 11L)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
-        assertThat(findComment.getParentCommentId()).isEqualTo(1L);
-        assertThat(findComment.getCommentId()).isEqualTo(2L);
+        assertThat(findComment.getParentCommentId()).isEqualTo(9L);
+        assertThat(findComment.getCommentId()).isEqualTo(11L);
     }
 
     @Test

@@ -2,6 +2,8 @@ package com.cheolhyeon.free_commnunity_1.category.service.type;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 public enum Category {
     GENERAL(1L,"자유게시판"),
@@ -19,11 +21,10 @@ public enum Category {
     }
 
     public static Category get(Category name) {
-        for (Category category : Category.values()) {
-            if (category.equals(name))
-                return category;
-        }
-        return Category.GENERAL;
+       return Arrays.stream(values())
+                .filter(category -> category.equals(name))
+                .findFirst()
+                .orElse(Category.GENERAL);
     }
 
 }
