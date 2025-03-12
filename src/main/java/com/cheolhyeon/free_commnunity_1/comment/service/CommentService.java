@@ -50,10 +50,10 @@ public class CommentService {
         List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
         return CommentReadResponse.from(commentsOfTree);
     }
-
     public int getCommentsCount(List<CommentReadResponse> comments) {
         return comments.size() + comments.stream()
-                .mapToInt(comment -> comment.getReplies().size()).sum();
+                .mapToInt(comment -> comment.getReplies().size())
+                .sum();
     }
 
     public void update(Long postId, Long commentId, CommentUpdateRequest request) {
