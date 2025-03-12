@@ -2,11 +2,14 @@ package com.cheolhyeon.free_commnunity_1.comment.repository;
 
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
+import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
+import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,6 +21,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CommentRepositoryTest {
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private TestEntityManager em;
 
 
     @Test
@@ -89,5 +95,81 @@ class CommentRepositoryTest {
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         assertThat(findComment.getParentCommentId()).isEqualTo(1L);
         assertThat(findComment.getCommentId()).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("특정 댓글이 자식 댓글이 없는 경우 countBy() 함수의 결과는 1이 된다.")
+    void countByWhenRootCommentWithoutChildrenComment() {
+        //given
+        UserEntity user = createUser();
+        em.persist(user);
+        PostEntity post = createPost(user);
+        em.persist(post);
+        CommentEntity rootComment = createRootComment();
+        em.persist(rootComment);
+
+        em.clear();
+        //when
+        int count = commentRepository.countBy(1L, 1L, 2L);
+        //then
+        assertThat(count).isEqualTo(1);
+    }
+    @Test
+    @DisplayName("특정 댓글이 자식댓글을 1개 이상 포함하고 있다면 countBy()의 결과는 2가 된다.")
+    void doTest() {
+        //given
+        UserEntity user = createUser();
+        em.persist(user);
+        PostEntity post = createPost(user);
+        em.persist(post);
+        CommentEntity rootComment = createRootComment();
+        CommentEntity childrenComment1 = createChildrenComment();
+        CommentEntity childrenComment2 = createChildrenComment();
+        em.persist(rootComment);
+        em.persist(childrenComment1);
+        em.persist(childrenComment2);
+
+        em.clear();
+        //when
+        int count = commentRepository.countBy(1L, 1L, 2L);
+        //then
+        assertThat(count).isEqualTo(2);
+    }
+
+
+    private CommentEntity createChildrenComment() {
+        return CommentEntity.builder()
+                .parentCommentId(1L)
+                .postId(1L)
+                .content("자식 댓글")
+                .deleted(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private CommentEntity createRootComment() {
+        return CommentEntity.builder()
+                .parentCommentId(1L)
+                .postId(1L)
+                .content("루트 댓글")
+                .deleted(false)
+                .createdAt(LocalDateTime.now())
+                .updatedAt(LocalDateTime.now())
+                .build();
+    }
+
+    private UserEntity createUser() {
+        return UserEntity.builder()
+                .nickname("테스트 닉네임")
+                .build();
+    }
+
+    private PostEntity createPost(UserEntity user) {
+        return PostEntity.builder()
+                .title("테스트 게시글")
+                .content("내용")
+                .userId(user.getId())
+                .build();
     }
 }
