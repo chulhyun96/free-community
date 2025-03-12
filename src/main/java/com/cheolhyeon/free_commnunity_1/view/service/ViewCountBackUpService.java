@@ -13,7 +13,6 @@ public class ViewCountBackUpService {
 
     @Transactional
     public void backUp(Long postId, Long viewCount) {
-        // 요놈이 백업을 하는것이다, -> 여기서 ViewCountEntity를 저장할 때 엔티티를 생성하고 DB에 저장
         int result = viewCountBackUpRepository.updateViewCount(postId, viewCount);
         if (result == 0) {
             viewCountBackUpRepository.findById(postId)
