@@ -9,13 +9,12 @@ import java.time.Duration;
 @Repository
 @RequiredArgsConstructor
 public class ViewCountDistributedLockRepository {
-    private final static String KEY = "post:%s:user:%s:lock";
-    private final StringRedisTemplate redisTemplate;
+    private static final String KEY = "post:%s:user:%s:lock";
+    private final StringRedisTemplate viewCountRedisTemplate;
 
     public boolean lock(Long postId, Long userId, Duration ttl) {
         String key = generateKey(postId, userId);
-        // 이미 존재하면 false 반환, 없다면 true 반환
-        return Boolean.TRUE.equals(redisTemplate.opsForValue().setIfAbsent(key, "", ttl));
+        return Boolean.TRUE.equals(viewCountRedisTemplate.opsForValue().setIfAbsent(key, "", ttl));
     }
 
     private String generateKey(Long postId, Long userId) {

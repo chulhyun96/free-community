@@ -11,14 +11,26 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 public class RedisConfig {
 
     @Bean
-    public RedisConnectionFactory redisConnectionFactory() {
+    public RedisConnectionFactory viewCountRedisConnectionFactory() {
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
         configuration.setDatabase(0);
         return new LettuceConnectionFactory(configuration);
     }
 
     @Bean
-    public StringRedisTemplate redisTemplate() {
-        return new StringRedisTemplate(redisConnectionFactory());
+    public StringRedisTemplate viewCountRedisTemplate() {
+        return new StringRedisTemplate(viewCountRedisConnectionFactory());
+    }
+
+    @Bean
+    public RedisConnectionFactory commentLikeRedisConnectionFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setDatabase(1);
+        return new LettuceConnectionFactory(configuration);
+    }
+
+    @Bean
+    public StringRedisTemplate commentLikeRedisTemplate() {
+        return new StringRedisTemplate(commentLikeRedisConnectionFactory());
     }
 }

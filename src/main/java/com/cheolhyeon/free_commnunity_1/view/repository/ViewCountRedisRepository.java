@@ -7,18 +7,17 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class ViewCountRedisRepository {
-    private final static String KEY = "post:%s:view_count";
-    private final StringRedisTemplate redisTemplate;
+    private static final String KEY = "post:%s:view_count";
+    private final StringRedisTemplate viewCountRedisTemplate;
 
     public Long read(Long postId) {
-        String result = redisTemplate.opsForValue().get(generateKey(postId));
+        String result = viewCountRedisTemplate.opsForValue().get(generateKey(postId));
         return result == null ? 0L : Long.parseLong(result);
     }
 
     public Long increase(Long postId) {
-        return redisTemplate.opsForValue().increment(generateKey(postId));
+        return viewCountRedisTemplate.opsForValue().increment(generateKey(postId));
     }
-
 
     private String generateKey(Long postId) {
         return KEY.formatted(postId);
