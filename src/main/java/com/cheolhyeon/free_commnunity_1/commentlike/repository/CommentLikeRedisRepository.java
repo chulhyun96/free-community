@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class CommentLikeRedisRepository {
-    private static final String KEY = "comment_like_count:%s";
+    private static final String KEY = "comments_like:%s:count";
     private final StringRedisTemplate commentLikeRedisTemplate;
 
     public void increment(Long commentId) {
