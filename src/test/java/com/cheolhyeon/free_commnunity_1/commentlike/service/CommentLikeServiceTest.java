@@ -31,13 +31,14 @@ class CommentLikeServiceTest {
     @DisplayName("처음에 댓글 좋아요를 누르면 Redis에 키를 저장하고 댓글 좋아요 수가 증가한다.")
     void incrementCommentLikeWhenItsFirst() {
         //given
+        Long postId = 1L;
         given(commentLikeQueryRedisRepository.isLikedByUserIdAndCommentId(
                 userId, commentId)).willReturn(false);
         //when
-        commentLikeService.toggleLike(userId, commentId);
+        commentLikeService.toggleLike(userId, postId, commentId);
 
         //then
-        then(commentLikeRedisRepository).should(times(1)).increment(commentId);
+        then(commentLikeRedisRepository).should(times(1)).increment(postId,commentId);
         then(commentLikeQueryRedisRepository).should(times(1)).insert(userId, commentId);
     }
 
@@ -45,13 +46,14 @@ class CommentLikeServiceTest {
     @DisplayName("이미 좋아요를 누른 댓글에 또 좋아요를 누르면 Redis에서 키를 삭제하고 댓글 좋아요 수가 감소한다.")
     void decrementCommentLikeWhenSecond() {
         //given
+        Long postId = 1L;
         given(commentLikeQueryRedisRepository.isLikedByUserIdAndCommentId(
                 userId, commentId)).willReturn(true);
         //when
-        commentLikeService.toggleLike(userId, commentId);
+        commentLikeService.toggleLike(userId, postId, commentId);
 
         //then
-        then(commentLikeRedisRepository).should(times(1)).decrement(commentId);
+        then(commentLikeRedisRepository).should(times(1)).decrement(postId, commentId);
         then(commentLikeQueryRedisRepository).should(times(1)).delete(userId, commentId);
     }
 
@@ -59,10 +61,11 @@ class CommentLikeServiceTest {
     @DisplayName("특정 댓글의 전체 좋아요 개수를 반환한다.")
     void doTest() {
         //given
-        given(commentLikeService.getCurrentCommentLikeCount(commentId)).willReturn(100L);
+        Long postId = 1L;
+        given(commentLikeService.getCurrentCommentLikeCount(postId, commentId)).willReturn(100L);
         //when
-        commentLikeService.getCurrentCommentLikeCount(commentId);
+        commentLikeService.getCurrentCommentLikeCount(postId, commentId);
         //then
-        then(commentLikeRedisRepository).should(times(1)).getCurrentCommentLikeCount(commentId);
+        then(commentLikeRedisRepository).should(times(1)).getCurrentCommentLikeCount(postId, commentId);
     }
 }

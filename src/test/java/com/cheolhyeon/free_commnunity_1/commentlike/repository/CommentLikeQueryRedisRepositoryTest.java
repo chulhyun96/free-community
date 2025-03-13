@@ -28,53 +28,56 @@ class CommentLikeQueryRedisRepositoryTest {
 
     private final Long userId = 1L;
     private final Long commentId = 100L;
-    private final String key = "comments_like:users:1:comments:100";
 
     @Test
     @DisplayName("특정 유저가 특정 댓글에 좋아요를 이미 눌렀다")
     void returnTrueWhenUserClickedLikeFirst() {
         //given
-        given(commentLikeRedisTemplate.hasKey(key)).willReturn(true);
+        String toggleKey = "comment_toggle:users:1:comments:100";
+        given(commentLikeRedisTemplate.hasKey(toggleKey)).willReturn(true);
         //when
         boolean result =
                 commentLikeQueryRedisRepository.isLikedByUserIdAndCommentId(userId, commentId);
         //then
         assertThat(result).isTrue();
-        then(commentLikeRedisTemplate).should(times(1)).hasKey(key);
+        then(commentLikeRedisTemplate).should(times(1)).hasKey(toggleKey);
     }
 
     @Test
     @DisplayName("특정 유저가 특정 댓글에 좋아요를 처음 눌렀다")
     void returnFalseWhenUserClickedLikeSecond() {
         //given
-        given(commentLikeRedisTemplate.hasKey(key)).willReturn(false);
+        String toggleKey = "comment_toggle:users:1:comments:100";
+        given(commentLikeRedisTemplate.hasKey(toggleKey)).willReturn(false);
         //when
         boolean result =
                 commentLikeQueryRedisRepository.isLikedByUserIdAndCommentId(userId, commentId);
         //then
         assertThat(result).isFalse();
-        then(commentLikeRedisTemplate).should(times(1)).hasKey(key);
+        then(commentLikeRedisTemplate).should(times(1)).hasKey(toggleKey);
     }
 
     @Test
     @DisplayName("insert 메서드 호출 시 Reids의 set이 호출되어 Key를 저장한다")
     void insert() {
         //given
+        String toggleKey = "comment_toggle:users:1:comments:100";
         given(commentLikeRedisTemplate.opsForValue()).willReturn(valueOperations);
         //when
         commentLikeQueryRedisRepository.insert(userId, commentId);
         //then
-        then(valueOperations).should(times(1)).set(key, "");
+        then(valueOperations).should(times(1)).set(toggleKey, "");
     }
 
     @Test
-    @DisplayName("delete 메서드 호출 시 Reids의 delete이 호출되어 Key를 삭제한다")
+    @DisplayName("delete 메서드 호출 시 Reids의 delete이 호출되어 toggle Key를 삭제한다")
     void delete() {
         //given
+        String toggleKey = "comment_toggle:users:1:comments:100";
         //when
         commentLikeQueryRedisRepository.delete(userId, commentId);
         //then
         then(commentLikeRedisTemplate).should(times(1))
-                .delete(key);
+                .delete(toggleKey);
     }
 }

@@ -6,6 +6,7 @@ import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentUpdate
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
+import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +40,9 @@ class CommentServiceTest {
     UserService userService;
 
     @Mock
+    CommentLikeService commentLikeService;
+
+    @Mock
     CommentEntity savedEntity;
 
     @InjectMocks
@@ -58,7 +62,6 @@ class CommentServiceTest {
                 .build();
 
         User mockUser = mock(User.class);
-        CommentEntity savedEntity = mock(CommentEntity.class);
         Comment expectedComment = mock(Comment.class);
 
         given(userService.readById(userId)).willReturn(mockUser);

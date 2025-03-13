@@ -16,10 +16,9 @@ class ViewCountBackUpRepositoryTest {
     @Autowired
     ViewCountBackUpRepository viewCountBackUpRepository;
 
-
     @Test
     @DisplayName("업데이트가 성공하면 result의 값이 1이되고 실패하면 0이된다.")
-    void doTest() {
+    void update() {
         //given
         viewCountBackUpRepository.save(
                 ViewCountEntity.init(1L, 0L)
@@ -28,7 +27,6 @@ class ViewCountBackUpRepositoryTest {
         //when
         int result1 = viewCountBackUpRepository.updateViewCount(1L, 100L);
         int result2 = viewCountBackUpRepository.updateViewCount(1L, 300L);
-        // 업데이트 실패
         int result3 = viewCountBackUpRepository.updateViewCount(1L, 200L);
 
         //then

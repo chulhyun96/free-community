@@ -36,8 +36,8 @@ class CommentLikeRedisRepositoryTest {
         given(valueOperations.get(anyString())).willReturn("1");
 
         // When
-        likeRedisRepository.increment(1L);
-        Long currentCommentLikeCount = likeRedisRepository.getCurrentCommentLikeCount(1L);
+        likeRedisRepository.increment(1L, 1L);
+        Long currentCommentLikeCount = likeRedisRepository.getCurrentCommentLikeCount(1L, 1L);
 
         // Then
         assertThat(currentCommentLikeCount).isEqualTo(1L);
@@ -52,8 +52,8 @@ class CommentLikeRedisRepositoryTest {
         given(valueOperations.get(anyString())).willReturn("1");
 
         // When
-        likeRedisRepository.decrement(1L);
-        Long currentCommentLikeCount = likeRedisRepository.getCurrentCommentLikeCount(1L);
+        likeRedisRepository.decrement(1L,1L);
+        Long currentCommentLikeCount = likeRedisRepository.getCurrentCommentLikeCount(1L,1L);
 
         // Then
         assertThat(currentCommentLikeCount).isEqualTo(1L);
@@ -67,7 +67,7 @@ class CommentLikeRedisRepositoryTest {
         given(commentLikeRedisTemplate.opsForValue()).willReturn(valueOperations);
         given(valueOperations.get(anyString())).willReturn("100");
         //when
-        Long currentCommentLikeCount = likeRedisRepository.getCurrentCommentLikeCount(1L);
+        Long currentCommentLikeCount = likeRedisRepository.getCurrentCommentLikeCount(1L,1L);
         //then
         assertThat(currentCommentLikeCount).isEqualTo(100);
         then(valueOperations).should(times(1)).get(anyString());

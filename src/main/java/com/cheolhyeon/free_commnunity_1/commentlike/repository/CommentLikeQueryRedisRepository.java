@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 @RequiredArgsConstructor
 public class CommentLikeQueryRedisRepository {
-    private static final String KEY = "comment_toggle:users:%s:comments:%s";
+    private static final String TOGGLE_KEY = "comment_toggle:users:%s:comments:%s";
     private final StringRedisTemplate commentLikeRedisTemplate;
 
     public boolean isLikedByUserIdAndCommentId(Long userId, Long commentId) {
@@ -29,6 +29,6 @@ public class CommentLikeQueryRedisRepository {
     }
 
     private String generateKey(Long userId, Long commentId) {
-        return KEY.formatted(userId, commentId);
+        return TOGGLE_KEY.formatted(userId, commentId);
     }
 }

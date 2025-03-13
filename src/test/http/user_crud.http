@@ -7,10 +7,10 @@ Content-Type: application/json
 }
 
 ### User Read
-GET localhost:8080/users/1
+GET localhost:8080/users/4
 
 ### User Update
-PATCH localhost:8080/users/1
+PATCH localhost:8080/users/4
 Content-Type: application/json
 
 {

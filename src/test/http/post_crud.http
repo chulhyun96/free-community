@@ -1,12 +1,12 @@
 POST http://localhost:8080/posts
-X-User-Id: 100
+X-User-Id: 4
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
 Content-Disposition: form-data; name="post"
 Content-Type: application/json
 
-{"categoryId":3, "title":"안녕하세요1123", "content":"반갑습니다2123123"}
+{"categoryId":1, "title":"안녕하세요1123", "content":"반갑습니다2123123"}
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="test.png"
 Content-Type: image/png  # ✅ 파일 타입 명시
@@ -22,9 +22,8 @@ Content-Type: image/png  # ✅ 파일 타입 명시
 
 
 ### GET
-GET localhost:8080/posts/2
-X-User-Id: 10
-
+GET localhost:8080/posts/5
+X-User-Id: 4
 
 
 
