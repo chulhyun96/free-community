@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class CategoryService {
     private final CategoryRepository categoryRepository;
 
-    public Category findById(Long id) {
+    public Category getCategory(Long id) {
         CategoryEntity entity = categoryRepository.findById(id).orElseThrow();
         return Category.get(entity.getName());
     }
