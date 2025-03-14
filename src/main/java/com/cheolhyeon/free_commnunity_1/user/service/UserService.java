@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -26,9 +28,9 @@ public class UserService {
         return entity.toModel();
     }
 
-    public User updateById(Long userId, UserUpdateRequest request) {
+    public User updateById(Long userId, UserUpdateRequest request, LocalDateTime updatedAt) {
         UserEntity entity = userRepository.findById(userId).orElseThrow();
-        User model = entity.toModel().update(request);
+        User model = entity.toModel().update(request, updatedAt);
         entity.update(model);
         return model;
     }
