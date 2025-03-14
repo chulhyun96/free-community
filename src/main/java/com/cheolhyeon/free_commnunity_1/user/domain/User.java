@@ -28,9 +28,9 @@ public class User {
         return user;
     }
 
-    public User update(UserUpdateRequest request) {
+    public User update(UserUpdateRequest request, LocalDateTime updatedAt) {
         this.nickname = request.getNickname();
-        this.updatedAt = LocalDateTime.now();
+        this.updatedAt = updatedAt;
         return this;
     }
 }
