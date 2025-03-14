@@ -15,11 +15,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
@@ -60,35 +62,37 @@ class UserControllerTest {
     }
     @Test
     @DisplayName("유저 단일 조회")
-    void readById() {
+    void readById() throws Exception {
         //given
-        final Long userId = 100L;
+        Long userId = 1L;
         User user = User.builder()
-                .nickname("유저 단일 조회")
+                .nickname("유저 닉네임")
                 .build();
-        given(userService.readById(anyLong())).willReturn(user);
-        //when
-        User findedUser = userService.readById(userId);
 
-        //then
-        assertThat(findedUser).isEqualTo(user);
-        assertThat(findedUser).isNotNull();
-        assertThat(findedUser.getNickname()).isEqualTo(user.getNickname());
+        given(userService.readById(userId)).willReturn(user);
+        mockMvc.perform(get("/users/{userId}", userId))
+                .andExpect(status().isOk());
     }
 
     @Test
     @DisplayName("유저 업데이트")
-    void update() {
+    void update() throws Exception {
         //given
         final Long userId = 100L;
         UserUpdateRequest request = new UserUpdateRequest("업데이트 유저");
         User update = User.builder()
                 .nickname(request.getNickname())
                 .build();
-        given(userService.updateById(anyLong(), any(UserUpdateRequest.class)))
+
+        given(userService.updateById(anyLong(), any(UserUpdateRequest.class), any(LocalDateTime.class)))
                 .willReturn(update);
+
+        mockMvc.perform(patch("/users/{userId}", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(mapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
         //when
-        User user = userService.updateById(userId, request);
+        User user = userService.updateById(userId, request, LocalDateTime.now());
 
         //then
         assertThat(user).isEqualTo(update);
