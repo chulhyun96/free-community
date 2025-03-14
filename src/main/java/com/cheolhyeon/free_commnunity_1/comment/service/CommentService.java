@@ -6,12 +6,13 @@ import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentUpdate
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
+import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 
 import static java.util.function.Predicate.not;
 
@@ -21,6 +22,7 @@ import static java.util.function.Predicate.not;
 public class CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
+    private final CommentLikeService commentLikeService;
 
     public Comment create(Long postId, CommentCreateRequest request) {
         userService.readById(request.getUserId());
@@ -46,10 +48,22 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentReadResponse> read(Long postId) {
-        List<CommentEntity> commentEntities = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        List<CommentEntity> commentEntities = commentRepository.findByPostIdWithHierarchy(postId);
         List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
-        return CommentReadResponse.from(commentsOfTree);
+        Map<Long, Long> likeReaderBoard = getLikeReaderBoard(postId, commentEntities);
+
+        return CommentReadResponse.of(commentsOfTree, likeReaderBoard);
     }
+
+    private Map<Long, Long> getLikeReaderBoard(Long postId, List<CommentEntity> commentEntities) {
+        Map<Long, Long> likeReaderBoard = new HashMap<>();
+        for (CommentEntity commentEntity : commentEntities) {
+            Long currentCommentLikeCount = commentLikeService.getCurrentCommentLikeCount(postId, commentEntity.getCommentId());
+            likeReaderBoard.put(commentEntity.getCommentId(), currentCommentLikeCount);
+        }
+        return likeReaderBoard;
+    }
+
     public int getCommentsCount(List<CommentReadResponse> comments) {
         return comments.size() + comments.stream()
                 .mapToInt(comment -> comment.getReplies().size())
