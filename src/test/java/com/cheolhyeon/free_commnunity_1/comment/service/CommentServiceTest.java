@@ -82,13 +82,13 @@ class CommentServiceTest {
 
     @Test
     @DisplayName("Comment Read")
-    void readComment() {
+    void readOrderByCreateAtComment() {
         //given
         List<CommentEntity> comments = createCommentEntities();
         given(commentRepository.findByPostIdOrderByCreatedAtAsc(1L)).willReturn(comments);
 
         //when
-        List<CommentReadResponse> result = commentService.read(1L);
+        List<CommentReadResponse> result = commentService.readOrderByCreateAt(1L);
 
         //then
         assertThat(result).hasSize(3);
