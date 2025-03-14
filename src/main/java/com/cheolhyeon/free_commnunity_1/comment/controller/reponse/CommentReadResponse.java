@@ -7,6 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Builder
@@ -17,6 +18,7 @@ public class CommentReadResponse {
     private Long parentCommentId;
     private Long commentId;
     private String content;
+    private Long likeCount;
     private LocalDateTime createdAt;
 
     @Builder.Default
@@ -24,26 +26,27 @@ public class CommentReadResponse {
     private List<CommentReadResponse> replies = new ArrayList<>();
 
 
-    public static List<CommentReadResponse> from(List<Comment> commentsOfTree) {
+    public static List<CommentReadResponse> of(List<Comment> commentsOfTree, Map<Long, Long> likeReaderBoard) {
         if (commentsOfTree == null || commentsOfTree.isEmpty()) {
             return new ArrayList<>();
         }
 
         List<CommentReadResponse> responseList = new ArrayList<>();
         for (Comment comment : commentsOfTree) {
-            responseList.add(create(comment)); // create() 메서드 활용
+            Long likeCount = likeReaderBoard.get(comment.getCommentId());
+            responseList.add(createResponse(comment, likeCount, likeReaderBoard));
         }
         return responseList;
     }
 
-
-    private static CommentReadResponse create(Comment comment) {
+    private static CommentReadResponse createResponse(Comment comment, Long likeCount, Map<Long, Long> likeReaderBoard) {
         return CommentReadResponse.builder()
                 .commentId(comment.getCommentId())
                 .parentCommentId(comment.getParentCommentId())
                 .content(comment.getContent())
+                .likeCount(likeCount)
                 .createdAt(comment.getCreatedAt())
-                .replies(from(comment.getReplies())) // 대댓글이 존재하면 재귀적으로 변환
+                .replies(of(comment.getReplies(), likeReaderBoard)) // 대댓글도 재귀적으로 변환
                 .build();
     }
 }
