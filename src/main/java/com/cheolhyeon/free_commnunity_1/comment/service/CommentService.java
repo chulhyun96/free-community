@@ -48,10 +48,10 @@ public class CommentService {
 
     @Transactional(readOnly = true)
     public List<CommentReadResponse> read(Long postId) {
-        List<CommentEntity> commentEntities = commentRepository.findByPostIdWithHierarchy(postId);
-        List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
+        List<CommentEntity> commentEntities = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
         Map<Long, Long> likeReaderBoard = getLikeReaderBoard(postId, commentEntities);
 
+        List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
         return CommentReadResponse.of(commentsOfTree, likeReaderBoard);
     }
 
