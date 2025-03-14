@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -76,12 +77,13 @@ class UserServiceTest {
         User oldUser = mock(User.class);
         User updatedUser = mock(User.class);
 
+        LocalDateTime now = LocalDateTime.now();
         given(userRepository.findById(userId)).willReturn(Optional.of(entity));
         given(entity.toModel()).willReturn(oldUser);
-        given(oldUser.update(request)).willReturn(updatedUser);
+        given(oldUser.update(request, now)).willReturn(updatedUser);
 
         // when
-        User result = userService.updateById(userId, request);
+        User result = userService.updateById(userId, request, now);
 
         // then
         assertThat(result).isNotNull();
