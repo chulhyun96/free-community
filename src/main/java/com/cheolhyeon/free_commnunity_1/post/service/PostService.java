@@ -49,7 +49,7 @@ public class PostService {
     }
 
     public Category getCategory(Long categoryId) {
-        return categoryService.findById(categoryId);
+        return categoryService.getCategory(categoryId);
     }
 
     public Post update(List<MultipartFile> newImages, List<String> deletedImages, PostUpdateRequest request, Long userId, Long postId) throws JsonProcessingException {
