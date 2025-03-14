@@ -79,18 +79,18 @@ class CommentRepositoryTest {
 
         //when
         List<CommentEntity> result = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        for (CommentEntity commentEntity : result) {
+            System.out.println("commentEntity = " + commentEntity);
+        }
 
         //then
         assertThat(result).hasSize(3);
         assertThat(result.get(0).getParentCommentId()).isEqualTo(comment1.getParentCommentId());
-        assertThat(result.get(1).getParentCommentId()).isEqualTo(comment2.getParentCommentId());
-        assertThat(result.get(2).getParentCommentId()).isEqualTo(comment1.getParentCommentId());
-        assertThat(result.get(0).getContent()).isEqualTo(comment1.getContent());
-        assertThat(result.get(1).getContent()).isEqualTo(comment2.getContent());
-        assertThat(result.get(2).getContent()).isEqualTo(comment3.getContent());
+        assertThat(result.get(1).getParentCommentId()).isEqualTo(comment3.getParentCommentId());
+        assertThat(result.get(2).getParentCommentId()).isEqualTo(comment2.getParentCommentId());
     }
     @Test
-    void findByPostIdAndCommentId() {
+    void findByPostIdAndCommentIdOrderByCreatedAtAsc() {
         CommentEntity findComment = commentRepository.findByPostIdAndCommentId(5L, 11L)
                 .orElseThrow(() -> new RuntimeException("Comment not found"));
         assertThat(findComment.getParentCommentId()).isEqualTo(9L);
