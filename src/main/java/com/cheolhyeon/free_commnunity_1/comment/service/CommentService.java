@@ -12,7 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.function.Predicate.not;
 
@@ -47,12 +50,23 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentReadResponse> read(Long postId) {
+    public List<CommentReadResponse> readOrderByCreateAt(Long postId) {
         List<CommentEntity> commentEntities = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
         Map<Long, Long> likeReaderBoard = getLikeReaderBoard(postId, commentEntities);
-
         List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
         return CommentReadResponse.of(commentsOfTree, likeReaderBoard);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CommentReadResponse> readOrderByCommentLikes(Long postId) {
+        List<CommentEntity> commentEntities = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        Map<Long, Long> likeReaderBoard = getLikeReaderBoard(postId, commentEntities);
+        List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
+
+        List<CommentReadResponse> responses = CommentReadResponse.of(commentsOfTree, likeReaderBoard);
+        return responses.stream()
+                .sorted(Comparator.comparing(CommentReadResponse::getLikeCount).reversed())
+                .toList();
     }
 
     private Map<Long, Long> getLikeReaderBoard(Long postId, List<CommentEntity> commentEntities) {
