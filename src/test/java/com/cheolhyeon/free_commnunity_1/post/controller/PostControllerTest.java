@@ -146,11 +146,12 @@ class PostControllerTest {
         given(postService.getCategory(1L)).willReturn(Category.GENERAL);
 
         List<CommentReadResponse> comments = createRootCommentWithReplies("RootContent", "ReplyContent");
-        given(commentService.read(postId)).willReturn(comments);
+        given(commentService.readOrderByCreateAt(postId)).willReturn(comments);
 
         given(commentService.getCommentsCount(comments)).willReturn(comments.size());
         //when
-        MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
+        MvcResult result = mockMvc.perform(get("/posts/{postId}/comments", postId)
+                        .queryParam("sort", "latest")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", userId))
                 .andExpect(status().isOk())

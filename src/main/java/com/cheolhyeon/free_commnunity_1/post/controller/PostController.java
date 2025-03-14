@@ -39,13 +39,17 @@ public class PostController {
     @GetMapping("/posts/{postId}")
     public ResponseEntity<PostReadResponse> readById(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId) {
+            @RequestHeader("X-User-Id") Long userId,
+            @RequestParam(defaultValue = "latest") String sort) {
 
         Post post = postService.readById(postId, userId);
         Long currentViewCount = postService.getCurrentViewCount(postId);
         User user = postService.getUser(userId);
         Category category = postService.getCategory(post.getCategoryId());
-        List<CommentReadResponse> comments = commentService.read(postId);
+
+        List<CommentReadResponse> comments = "likes".equals(sort)
+                ? commentService.readOrderByCommentLikes(postId)
+                : commentService.readOrderByCreateAt(postId);
 
         return ResponseEntity.ok(PostReadResponse.from(
                 post,
