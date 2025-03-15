@@ -62,6 +62,8 @@ public class PostQueryRepository {
                 .from(postEntity)
                 .leftJoin(categoryEntity)
                 .on(postEntity.categoryId.eq(categoryEntity.id))
+                .leftJoin(viewCountEntity)
+                .on(postEntity.id.eq(viewCountEntity.postId))
                 .where(searchConditionAll(condition))
                 .orderBy(sortDirection(sort))
                 .offset(pageable.getOffset())
