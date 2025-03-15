@@ -7,6 +7,8 @@ import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateReques
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.LocalImageFormatter;
@@ -20,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.domain.*;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -29,14 +32,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(PostController.class)
@@ -150,7 +157,7 @@ class PostControllerTest {
 
         given(commentService.getCommentsCount(comments)).willReturn(comments.size());
         //when
-        MvcResult result = mockMvc.perform(get("/posts/{postId}/comments", postId)
+        MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
                         .queryParam("sort", "latest")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("X-User-Id", userId))
@@ -170,6 +177,36 @@ class PostControllerTest {
         assertThat(comments).hasSize(1);
         assertThat(comments.get(0).getParentCommentId()).isEqualTo(1L);
         assertThat(comments.get(0).getReplies().get(0).getCommentId()).isEqualTo(2L);
+    }
+
+    @Test
+    @DisplayName("게시글 상세 조회시 댓글의 좋아요 순 정렬")
+    void readPostById_Likes() throws Exception {
+        // given
+        Long postId = 1L;
+        Long userId = 123L;
+
+        Post post = mock(Post.class);
+        User user = mock(User.class);
+        Category category = Category.GENERAL;
+
+        List<CommentReadResponse> comments = List.of(
+                new CommentReadResponse(2L, 2L, "좋아요가 많은 댓글", 15L, LocalDateTime.now(), List.of()),
+                new CommentReadResponse(1L, 1L, "좋아요가 적은 댓글", 3L, LocalDateTime.now(), List.of())
+        );
+
+        given(postService.readById(postId, userId)).willReturn(post);
+        given(postService.getCurrentViewCount(postId)).willReturn(100L);
+        given(postService.getUser(userId)).willReturn(user);
+        given(postService.getCategory(post.getCategoryId())).willReturn(category);
+        given(commentService.readOrderByCommentLikes(postId)).willReturn(comments);
+        given(commentService.getCommentsCount(comments)).willReturn(comments.size());
+
+        mockMvc.perform(get("/posts/{postId}", postId)
+                        .header("X-User-Id", userId)
+                        .param("sort", "likes")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
 
@@ -197,6 +234,75 @@ class PostControllerTest {
         assertThat(update.getTitle()).isEqualTo(request.getTitle());
         assertThat(update.getContent()).isEqualTo(request.getContent());
         assertThat(update.getImageUrl()).isEqualTo(newImages);
+    }
+
+    @Test
+    @DisplayName("전체 게시판을 불러오며 sorting을 따로 정하지 않으면 createdAt desc로 불러온다.")
+    void readAll() throws Exception {
+        //given
+        PageRequest pageRequest = PageRequest.of(0, 10, Sort.by(Sort.Direction.DESC, "createdAt"));
+        List<PostSearchResponse> postSearchResponses = Stream.of(
+                        new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 10L, LocalDateTime.now().withYear(2024).minusMonths(2)),
+                        new PostSearchResponse(2L, "테스트 제목@", "LIFE", 20L, LocalDateTime.now().withYear(2024).minusMonths(1)))
+                .sorted(Comparator.comparing(PostSearchResponse::getCreatedAt).reversed())
+                .toList();
+        Page<PostSearchResponse> list = new PageImpl<>(postSearchResponses, pageRequest, 2);
+
+        given(postService.searchPostByCond(any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(list);
+
+        //when
+        mockMvc.perform(get("/posts")
+                        .queryParam("sort", ""))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("테스트 제목@"))
+                .andExpect(jsonPath("$.content[1].title").value("테스트 제목1"));
+    }
+
+    @Test
+    @DisplayName("전체 게시판을 불러오며 sorting을 viewCount로 하면 desc로 조회수가 가장 높은 순으로 불러온다.")
+    void readAllSortedByViewCount() throws Exception {
+        //given
+        List<PostSearchResponse> postSearchResponses = Stream.of(
+                        new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 30L, LocalDateTime.now().withYear(2024).minusMonths(2)),
+                        new PostSearchResponse(2L, "테스트 제목@", "LIFE", 20L, LocalDateTime.now().withYear(2024).minusMonths(1)))
+                .toList();
+        Page<PostSearchResponse> list = new PageImpl<>(postSearchResponses);
+        given(postService.searchPostByCond(any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(list);
+
+        //when
+        mockMvc.perform(get("/posts")
+                        .queryParam("sort", "viewCount"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("테스트 제목1"))
+                .andExpect(jsonPath("$.content[1].title").value("테스트 제목@"));
+    }
+
+    @Test
+    @DisplayName("무한 스크롤 방식으로 게시글을 조회할 수 있다.")
+    void readAllAsInfinity() throws Exception {
+        // given (테스트용 응답 데이터 설정)
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<PostSearchResponse> responses = List.of(
+                new PostSearchResponse(1L, "첫 번째 게시글", "GENERAL", 100L, LocalDateTime.now().minusDays(1)),
+                new PostSearchResponse(2L, "두 번째 게시글", "LIFE", 50L, LocalDateTime.now().minusDays(2))
+        );
+        Slice<PostSearchResponse> responseSlice = new SliceImpl<>(responses, pageRequest, false); // 마지막 페이지
+        given(postService.searchPostByCondAsInfinite(any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(responseSlice);
+
+        //when  then
+        mockMvc.perform(get("/posts-infinite")
+                        .queryParam("sort", "createdAt")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].title").value("첫 번째 게시글"))
+                .andExpect(jsonPath("$.content[1].title").value("두 번째 게시글"))
+                .andExpect(jsonPath("$.size").value(10))
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.last").value(true))
+                .andDo(print());
     }
 
 
