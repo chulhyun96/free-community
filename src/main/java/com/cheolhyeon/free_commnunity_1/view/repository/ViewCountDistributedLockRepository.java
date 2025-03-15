@@ -14,7 +14,7 @@ public class ViewCountDistributedLockRepository {
 
     public boolean lock(Long postId, Long userId, Duration ttl) {
         String key = generateKey(postId, userId);
-        return Boolean.TRUE.equals(viewCountRedisTemplate.opsForValue().setIfAbsent(key, "", ttl));
+        return !Boolean.TRUE.equals(viewCountRedisTemplate.opsForValue().setIfAbsent(key, "", ttl));
     }
 
     private String generateKey(Long postId, Long userId) {
