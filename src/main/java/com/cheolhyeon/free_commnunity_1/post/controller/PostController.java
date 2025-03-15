@@ -60,7 +60,7 @@ public class PostController {
     public ResponseEntity<PostReadResponse> readById(
             @PathVariable Long postId,
             @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(defaultValue = "latest") String sort) {
+            @RequestParam(required = false, name = "sort", defaultValue = "createdAt") String sort) {
 
         Post post = postService.readById(postId, userId);
         Long currentViewCount = postService.getCurrentViewCount(postId);
