@@ -2,16 +2,15 @@ package com.cheolhyeon.free_commnunity_1.post.service;
 
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
-import com.querydsl.jpa.impl.JPAQueryFactory;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -21,10 +20,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(PostQueryRepository.class)
 class PostQueryRepositoryTest {
 
-    @PersistenceContext
-    EntityManager em;
-
-    JPAQueryFactory query = new JPAQueryFactory(em);
 
     @Autowired
     PostQueryRepository repository;
@@ -59,6 +54,7 @@ class PostQueryRepositoryTest {
         assertThat(response).isNotNull();
         assertThat(response.getSize()).isEqualTo(20);
     }
+
     @Test
     @DisplayName("인피니티 스크롤 - 첫 페이지 : 다음페이지가 존재하는 경우 hasNext가 true가 된다.")
     void infiniteScrollHasNextTrue() {
@@ -72,6 +68,7 @@ class PostQueryRepositoryTest {
         assertThat(slice.getNumberOfElements()).isEqualTo(1);
         assertThat(slice.hasNext()).isTrue();
     }
+
     @Test
     @DisplayName("인피니티 스크롤 - 마지막 페치지 : 다음 페이지가 존재하지 않을 경우 hasNext가 false가 된다")
     void infiniteScrollHasNextFalse() {
