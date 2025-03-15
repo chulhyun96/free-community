@@ -1,9 +1,12 @@
 package com.cheolhyeon.free_commnunity_1.post.service;
 
+import com.cheolhyeon.free_commnunity_1.category.service.CategoryService;
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
@@ -20,14 +23,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssertions.tuple;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -47,6 +56,12 @@ class PostServiceTest {
 
     @Mock
     UserService userService;
+
+    @Mock
+    PostQueryRepository postQueryRepository;
+
+    @Mock
+    CategoryService categoryService;
 
     @InjectMocks
     PostService postService;
@@ -315,6 +330,7 @@ class PostServiceTest {
         );
         return List.of(updateFile1, updateFile2, updateFile3);
     }
+
     @Test
     @DisplayName("Post Delete")
     void deletePost() {
@@ -336,6 +352,207 @@ class PostServiceTest {
         assertThat(value.getTitle()).isEqualTo(post.getTitle());
         assertThat(value.getContent()).isEqualTo(post.getContent());
         assertThat(value.getCategoryId()).isEqualTo(Category.GENERAL.getId());
+    }
+
+    @Test
+    @DisplayName("검색조건으로 페이지 네이션 처리를 하며 정렬 순서는 기본값으로 최신순이다")
+    void searchPostByCondOrderByCreatedAtDesc() {
+        //given
+        PostSearchCondition condition = new PostSearchCondition();
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<PostSearchResponse> list = getPostSearchResponses(pageRequest);
+        given(postQueryRepository.searchByCond(any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(list);
+
+        //when
+        Page<PostSearchResponse> response = postService.searchPostByCond(condition, pageRequest, "");
+
+        //then
+        assertThat(response).isNotNull();
+        assertThat(response.getContent())
+                .extracting(PostSearchResponse::getPostId,
+                        PostSearchResponse::getTitle,
+                        PostSearchResponse::getCategoryName,
+                        PostSearchResponse::getViewCount
+                )
+                .containsExactly(
+                        tuple(2L, "테스트 제목@", "LIFE", 0L),
+                        tuple(1L, "테스트 제목1", "GENERAL", 0L)
+                );
+        assertThat(response.getContent())
+                .extracting(PostSearchResponse::getCreatedAt)
+                .isSortedAccordingTo(Comparator.reverseOrder());
+    }
+
+    @Test
+    @DisplayName("검색조건으로 페이지 네이션 처리를 하며 정렬 순서로 조회수를 하면  조회수 순이다")
+    void searchPostByCondOrderByViewCountDesc() {
+        //given
+        PostSearchCondition condition = new PostSearchCondition();
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+
+        Page<PostSearchResponse> list = getPostSearchResponsesOrderByViewCount(pageRequest);
+        given(postQueryRepository.searchByCond(any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(list);
+
+        //when
+        Page<PostSearchResponse> response = postService.searchPostByCond(condition, pageRequest, "viewCount");
+
+        //then
+        assertThat(response).isNotNull();
+        assertThat(response.getContent())
+                .extracting(PostSearchResponse::getPostId,
+                        PostSearchResponse::getTitle,
+                        PostSearchResponse::getCategoryName,
+                        PostSearchResponse::getViewCount
+                )
+                .containsExactly(
+                        tuple(1L, "테스트 제목1", "GENERAL", 0L),
+                        tuple(2L, "테스트 제목@", "LIFE", 0L)
+                );
+        assertThat(response.getContent())
+                .extracting(PostSearchResponse::getViewCount)
+                .isSortedAccordingTo(Comparator.reverseOrder());
+    }
+
+    @Test
+    @DisplayName("검색조건으로 무한스크롤 처리를 하며 정렬 순서는 기본값으로 최신순이다")
+    void searchPostByCondAsInfiniteOrderByCreatedAtDesc() {
+        //given
+        PostSearchCondition condition = new PostSearchCondition();
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<PostSearchResponse> responses = Stream.of(
+                        new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 0L, LocalDateTime.now().withYear(2024).minusMonths(2)),
+                        new PostSearchResponse(2L, "테스트 제목@", "LIFE", 10L, LocalDateTime.now().withYear(2024).minusMonths(1)))
+                .sorted(Comparator.comparing(PostSearchResponse::getCreatedAt).reversed())
+                .toList();
+        Slice<PostSearchResponse> responseSlice = new SliceImpl<>(responses, pageRequest, false); // 마지막 페이지
+
+        given(postQueryRepository.searchBySearchCondInfiniteScroll(
+                any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(responseSlice);
+        //when
+        Slice<PostSearchResponse> slice = postService.searchPostByCondAsInfinite(condition, pageRequest, "");
+
+        //then
+        assertThat(slice).isNotNull();
+        assertThat(slice.getContent())
+                .extracting(PostSearchResponse::getPostId,
+                        PostSearchResponse::getTitle,
+                        PostSearchResponse::getCategoryName,
+                        PostSearchResponse::getViewCount
+                )
+                .containsExactly(
+                        tuple(2L, "테스트 제목@", "LIFE", 0L),
+                        tuple(1L, "테스트 제목1", "GENERAL", 0L)
+                );
+        assertThat(slice.getContent())
+                .extracting(PostSearchResponse::getCreatedAt)
+                .isSortedAccordingTo(Comparator.reverseOrder());
+    }
+
+    @Test
+    @DisplayName("검색조건으로 무한스크롤 처리를 하며 조회순으로 정렬한다")
+    void searchPostByCondAsInfiniteOrderByViewCountDesc() {
+        //given
+        PostSearchCondition condition = new PostSearchCondition();
+
+        PageRequest pageRequest = PageRequest.of(0, 10);
+        List<PostSearchResponse> responses = Stream.of(
+                        new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 0L, LocalDateTime.now().withYear(2024).minusMonths(2)),
+                        new PostSearchResponse(2L, "테스트 제목@", "LIFE", 10L, LocalDateTime.now().withYear(2024).minusMonths(1)))
+                .sorted(Comparator.comparing(PostSearchResponse::getViewCount).reversed())
+                .toList();
+        Slice<PostSearchResponse> responseSlice = new SliceImpl<>(responses, pageRequest, false); // 마지막 페이지
+
+        given(postQueryRepository.searchBySearchCondInfiniteScroll(
+                any(PostSearchCondition.class), any(Pageable.class), anyString()))
+                .willReturn(responseSlice);
+        //when
+        Slice<PostSearchResponse> slice = postService.searchPostByCondAsInfinite(condition, pageRequest, "");
+
+        //then
+        assertThat(slice).isNotNull();
+        assertThat(slice.getContent())
+                .extracting(PostSearchResponse::getPostId,
+                        PostSearchResponse::getTitle,
+                        PostSearchResponse::getCategoryName,
+                        PostSearchResponse::getViewCount
+                )
+                .containsExactly(
+                        tuple(2L, "테스트 제목@", "LIFE", 0L),
+                        tuple(1L, "테스트 제목1", "GENERAL", 0L)
+                );
+        assertThat(slice.getContent())
+                .extracting(PostSearchResponse::getViewCount)
+                .isSortedAccordingTo(Comparator.reverseOrder());
+    }
+    @Test
+    @DisplayName("특정 게시글 조회 시 해당 게시글의 현재 조회수를 가지고 온다")
+    void getCurrentViewCount() {
+        //given
+        given(viewCountService.getCurrentViewCount(anyLong()))
+                .willReturn(2L);
+        //when
+        Long currentViewCount = postService.getCurrentViewCount(1L);
+        //then
+        assertThat(currentViewCount).isEqualTo(2L);
+    }
+    @Test
+    @DisplayName("특정 유저 조회 시 해당 유저의 정보를 가지고 온다")
+    void getUser() {
+        //given
+        User user = User.builder()
+                .id(1L)
+                .actionPoint(100L)
+                .nickname("안녕하세요")
+                .build();
+        given(userService.readById(anyLong()))
+                .willReturn(user);
+        //when
+        User result = postService.getUser(1L);
+
+        //then
+        assertThat(result).isEqualTo(user);
+        assertThat(result)
+                .extracting(User::getId,
+                        User::getActionPoint,
+                        User::getNickname
+                )
+                .containsExactly(1L, 100L, "안녕하세요");
+    }
+    @Test
+    @DisplayName("카테고리 ID로 특정 카테고리 조회 시 해당 Category객체가 반환된다")
+    void getCategory() {
+        //given
+        given(categoryService.getCategory(anyLong()))
+                .willReturn(Category.GENERAL);
+        //when
+        Category result = postService.getCategory(1L);
+        //then
+        assertThat(result)
+                .extracting(Category::getId, Category::getName)
+                .contains(1L, "자유게시판");
+    }
+    private Page<PostSearchResponse> getPostSearchResponses(PageRequest pageRequest) {
+        List<PostSearchResponse> postSearchResponses = Stream.of(
+                        new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 0L, LocalDateTime.now().withYear(2024).minusMonths(2)),
+                        new PostSearchResponse(2L, "테스트 제목@", "LIFE", 10L, LocalDateTime.now().withYear(2024).minusMonths(1)))
+                .sorted(Comparator.comparing(PostSearchResponse::getCreatedAt).reversed())
+                .toList();
+        return new PageImpl<>(postSearchResponses, pageRequest, 2);
+    }
+
+    private Page<PostSearchResponse> getPostSearchResponsesOrderByViewCount(PageRequest pageRequest) {
+        List<PostSearchResponse> postSearchResponses = Stream.of(
+                        new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 100L, LocalDateTime.now().withYear(2024).minusMonths(2)),
+                        new PostSearchResponse(2L, "테스트 제목@", "LIFE", 10L, LocalDateTime.now().withYear(2024).minusMonths(1)))
+                .sorted(Comparator.comparing(PostSearchResponse::getViewCount).reversed())
+                .toList();
+        return new PageImpl<>(postSearchResponses, pageRequest, 2);
     }
 
     private List<MultipartFile> createImagesOnlyTwo() {
