@@ -4,6 +4,8 @@ import com.cheolhyeon.free_commnunity_1.category.service.CategoryService;
 import com.cheolhyeon.free_commnunity_1.category.service.type.Category;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
+import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
@@ -13,6 +15,9 @@ import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +31,7 @@ public class PostService {
     private final CategoryService categoryService;
     private final ViewCountService viewCountService;
     private final UserService userService;
+    private final PostQueryRepository postQueryRepository;
 
     public Post create(List<MultipartFile> images, PostCreateRequest request, Long userId) throws JsonProcessingException {
         User user = userService.readById(userId);
@@ -64,5 +70,29 @@ public class PostService {
         PostEntity entity = postRepository.findByIdAndUserId(postId, userId)
                 .orElseThrow(() -> new RuntimeException("Post not found"));
         postRepository.delete(entity);
+    }
+
+    public Page<PostSearchResponse> searchPostByCond(PostSearchCondition condition, Pageable pageable, String sort) {
+        Page<PostSearchResponse> postSearchResponses = postQueryRepository.searchByCond(condition, pageable, sort);
+        allocateViewCountOfPost(postSearchResponses);
+        return postSearchResponses;
+    }
+
+    public Slice<PostSearchResponse> searchPostByCondAsInfinite(PostSearchCondition condition, Pageable pageable, String sort) {
+        Slice<PostSearchResponse> sliceResponse = postQueryRepository.searchBySearchCondInfiniteScroll(condition, pageable, sort);
+        allocateViewCountOfPost(sliceResponse);
+        return sliceResponse;
+    }
+
+    private void allocateViewCountOfPost(Page<PostSearchResponse> postSearchResponses) {
+        for (PostSearchResponse postSearchResponse : postSearchResponses) {
+            postSearchResponse.allocateCurrentViewCount(viewCountService.getCurrentViewCount(postSearchResponse.getPostId()));
+        }
+    }
+
+    private void allocateViewCountOfPost(Slice<PostSearchResponse> postSearchResponses) {
+        for (PostSearchResponse postSearchResponse : postSearchResponses) {
+            postSearchResponse.allocateCurrentViewCount(viewCountService.getCurrentViewCount(postSearchResponse.getPostId()));
+        }
     }
 }
