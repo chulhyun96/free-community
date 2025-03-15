@@ -2,7 +2,6 @@ package com.cheolhyeon.free_commnunity_1.view.service;
 
 import com.cheolhyeon.free_commnunity_1.view.repository.ViewCountDistributedLockRepository;
 import com.cheolhyeon.free_commnunity_1.view.repository.ViewCountRedisRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,9 +11,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Duration;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+
 
 @ExtendWith(MockitoExtension.class)
 class ViewCountServiceTest {
@@ -31,30 +32,72 @@ class ViewCountServiceTest {
     @InjectMocks
     ViewCountService viewCountService;
 
+
     @Test
-    @DisplayName("유저가 게시글 조회 시 lock이 걸려있지 않으면 조회수를 증가시킨다")
-    void increaseWithoutLock() {
-        //given
-        given(viewCountDistributedLockRepository.lock(anyLong(), anyLong(), any(Duration.class)))
-                    .willReturn(Boolean.FALSE);
-        given(viewCountRedisRepository.increase(anyLong()))
-                .willReturn(1L);
-        //when
-        Long increase = viewCountService.increase(1L, 1L);
-        //then
-        Assertions.assertThat(increase).isEqualTo(1L);
+    @DisplayName(" 락이 걸리면 viewCountRedisRepository.read()가 호출되고 증가하지 않는다.")
+    void shouldReturnCurrentViewCountIfLockIsAcquired() {
+        // Given
+        Long postId = 1L;
+        Long userId = 2L;
+        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(3))).willReturn(true);
+        given(viewCountRedisRepository.read(postId)).willReturn(100L);
+
+        // When
+        Long result = viewCountService.increase(postId, userId);
+
+        // Then
+        assertThat(result).isEqualTo(100L);
+        verify(viewCountRedisRepository, never()).increase(anyLong());
+        verify(viewCountBackUpService, never()).backUp(anyLong(), anyLong());
     }
+
     @Test
-    @DisplayName("유저가 게시글 조회 시 lock이 걸려있다면 조회수를 증가시키지 않고 해당 게시글의 최신 조회수를 반환한다.")
-    void increaseWithLock() {
+    @DisplayName("락이 없으면 viewCount가 증가하며 backUp은 호출되지 않는다.")
+    void shouldIncreaseViewCountWithoutBackupIfNotMultipleOfBatchSize() {
+        // Given
+        Long postId = 1L;
+        Long userId = 2L;
+        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(3))).willReturn(false);
+        given(viewCountRedisRepository.increase(postId)).willReturn(7L);
+
+        // When
+        Long result = viewCountService.increase(postId, userId);
+
+        // Then
+        assertThat(result).isEqualTo(7L);
+        verify(viewCountRedisRepository, times(1)).increase(postId);
+        verify(viewCountBackUpService, never()).backUp(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("증가된 viewCount가 BACK_UP_BATCH_SIZE의 배수이면 backUp이 호출된다.")
+    void shouldCallBackupWhenViewCountIsMultipleOfBatchSize() {
+        // Given
+        Long postId = 1L;
+        Long userId = 2L;
+        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(3))).willReturn(false);
+        given(viewCountRedisRepository.increase(postId)).willReturn(50L);
+
+        // When
+        Long result = viewCountService.increase(postId, userId);
+
+        // Then
+        assertThat(result).isEqualTo(50L); // ✅ 증가된 조회수 반환
+        verify(viewCountRedisRepository, times(1)).increase(postId);
+        verify(viewCountBackUpService, times(1)).backUp(postId, userId);
+    }
+
+    @Test
+    @DisplayName("특정 게시글의 현재 조회수를 반환한다")
+    void getCurrentViewCount() {
         //given
-        given(viewCountDistributedLockRepository.lock(anyLong(), anyLong(), any(Duration.class)))
-                .willReturn(Boolean.TRUE);
         given(viewCountRedisRepository.read(anyLong()))
-                .willReturn(1L);
+                .willReturn(50L);
         //when
-        Long currentViewCount = viewCountService.increase(1L, 1L);
+        Long currentViewCount = viewCountService.getCurrentViewCount(1L);
+
         //then
-        Assertions.assertThat(currentViewCount).isEqualTo(1L);
+        assertThat(currentViewCount).isEqualTo(50L);
+
     }
 }

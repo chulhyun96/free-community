@@ -44,11 +44,11 @@ class ViewCountDistributedLockRepositoryTest {
         boolean lock = viewCountDistributedLockRepository.lock(postId, userId, ttl);
 
         //then
-        assertTrue(lock);
+        assertFalse(lock);
         then(valueOperations).should().setIfAbsent(key, "", ttl);
     }
     @Test
-    @DisplayName("조회수 어뷰징 방지 - 이미 조회한 유저가 또 조회할 경우")
+    @DisplayName("조회수 어뷰징 방지 - 처음 조회할 경우")
     void abusingPolicyFalse() {
         //given
         given(viewCountRedisTemplate.opsForValue()).willReturn(valueOperations);
@@ -57,7 +57,7 @@ class ViewCountDistributedLockRepositoryTest {
         boolean lock = viewCountDistributedLockRepository.lock(postId, userId, ttl);
 
         //then
-        assertFalse(lock);
+        assertTrue(lock);
         then(valueOperations).should().setIfAbsent(key, "", ttl);
     }
     @Test
