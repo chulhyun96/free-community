@@ -75,7 +75,7 @@ class CommentQueryRepositoryTest {
     }
 
     @Test
-    @DisplayName("✅ 마지막 페이지에서는 count 쿼리가 실행되지 않는다.")
+    @DisplayName("마지막 페이지에서는 count 쿼리가 실행되지 않는다.")
     void countQueryDoesNotExecuteOnLastPage() {
         // Given
         Pageable pageable = PageRequest.of(2, 2);
