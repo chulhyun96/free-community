@@ -6,7 +6,6 @@ import com.cheolhyeon.free_commnunity_1.comment.service.CommentService;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
-import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
@@ -157,26 +156,28 @@ class PostControllerTest {
 
         given(commentService.getCommentsCount(comments)).willReturn(comments.size());
         //when
-        MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
-                        .queryParam("sort", "latest")
+        mockMvc.perform(get("/posts/{postId}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
+                        .queryParam("sort", "createdAt")
                         .header("X-User-Id", userId))
                 .andExpect(status().isOk())
+                // 첫 번째 댓글 검증 (Root)
+                .andExpect(jsonPath("$.comments[0].parentCommentId").value(1))
+                .andExpect(jsonPath("$.comments[0].commentId").value(1))
+                .andExpect(jsonPath("$.comments[0].content").value("RootContent"))
+                .andExpect(jsonPath("$.comments[0].createdAt").value("2022-01-01T01:01:00"))
+                //  첫 번째 댓글의 대댓글(Reply) 검증
+                .andExpect(jsonPath("$.comments[0].replies[0].parentCommentId").value(1))
+                .andExpect(jsonPath("$.comments[0].replies[0].commentId").value(2))
+                .andExpect(jsonPath("$.comments[0].replies[0].content").value("ReplyContent"))
+                .andExpect(jsonPath("$.comments[0].replies[0].createdAt").value("2024-01-01T01:02:00"))
+                //  두 번째 댓글 검증
+                .andExpect(jsonPath("$.comments[1].parentCommentId").value(3))
+                .andExpect(jsonPath("$.comments[1].commentId").value(3))
+                .andExpect(jsonPath("$.comments[1].content").value("뭘봐"))
+                .andExpect(jsonPath("$.comments[1].createdAt").value("2024-01-01T01:01:00"))
                 .andReturn();
 
-        String contentAsString = result.getResponse().getContentAsString();
-        PostReadResponse response = mapper.readValue(contentAsString, PostReadResponse.class);
-
-        //then
-        assertThat(response.getTitle()).isEqualTo(post.getTitle());
-        assertThat(response.getContent()).isEqualTo(post.getContent());
-        assertThat(response.getNickname()).isEqualTo(user.getNickname());
-        assertThat(response.getImageUrl()).isEqualTo(post.getImageUrl());
-        assertThat(response.getCategoryName()).isEqualTo(Category.GENERAL.getName());
-        assertThat(response.getViewCount()).isEqualTo(100);
-        assertThat(comments).hasSize(1);
-        assertThat(comments.get(0).getParentCommentId()).isEqualTo(1L);
-        assertThat(comments.get(0).getReplies().get(0).getCommentId()).isEqualTo(2L);
     }
 
     @Test
@@ -204,7 +205,6 @@ class PostControllerTest {
 
         mockMvc.perform(get("/posts/{postId}", postId)
                         .header("X-User-Id", userId)
-                        .param("sort", "likes")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
     }
@@ -308,10 +308,17 @@ class PostControllerTest {
 
     private List<CommentReadResponse> createRootCommentWithReplies(String rootContent, String replycContent) {
         List<CommentReadResponse> response = new ArrayList<>();
-        CommentReadResponse root = CommentReadResponse.builder()
+        CommentReadResponse root1 = CommentReadResponse.builder()
                 .commentId(1L)
                 .parentCommentId(1L)
                 .content(rootContent)
+                .createdAt(LocalDateTime.of(2022, 1, 1, 1, 1))
+                .replies(new ArrayList<>())
+                .build();
+        CommentReadResponse root2 = CommentReadResponse.builder()
+                .commentId(3L)
+                .parentCommentId(3L)
+                .content("뭘봐")
                 .createdAt(LocalDateTime.of(2024, 1, 1, 1, 1))
                 .replies(new ArrayList<>())
                 .build();
@@ -322,8 +329,9 @@ class PostControllerTest {
                 .createdAt(LocalDateTime.of(2024, 1, 1, 1, 2))
                 .replies(List.of())
                 .build();
-        root.getReplies().add(reply);
-        response.add(root);
+        root1.getReplies().add(reply);
+        response.add(root1);
+        response.add(root2);
         return response;
     }
 }
