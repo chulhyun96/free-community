@@ -7,11 +7,16 @@ import com.cheolhyeon.free_commnunity_1.post.controller.request.PostCreateReques
 import com.cheolhyeon.free_commnunity_1.post.controller.request.PostUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostCreateResponse;
 import com.cheolhyeon.free_commnunity_1.post.controller.response.PostReadResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchResponse;
+import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,8 +37,23 @@ public class PostController {
             @RequestHeader("X-User-Id") Long userId) throws JsonProcessingException {
 
         Post post = postService.create(images, request, userId);
-
         return ResponseEntity.ok(PostCreateResponse.from(post));
+    }
+
+    @GetMapping("/posts")
+    public Page<PostSearchResponse> readAll(
+            PostSearchCondition condition,
+            Pageable pageable,
+            @RequestParam(required = false, name = "sort") String sort) {
+        return postService.searchPostByCond(condition, pageable, sort);
+    }
+
+    @GetMapping("/posts-infinite")
+    public Slice<PostSearchResponse> readAllAsInfinity(
+            PostSearchCondition condition,
+            Pageable pageable,
+            @RequestParam(required = false, name = "sort") String sort) {
+        return postService.searchPostByCondAsInfinite(condition, pageable, sort);
     }
 
     @GetMapping("/posts/{postId}")
@@ -68,7 +88,6 @@ public class PostController {
             @RequestPart("post") PostUpdateRequest request,
             @PathVariable("postId") Long postId,
             @RequestHeader("X-User-Id") Long userId) throws JsonProcessingException {
-
         postService.update(newImages, deletedImages, request, postId, userId);
         return ResponseEntity.ok(HttpStatus.OK);
     }
