@@ -19,11 +19,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class PostService {
     private final PostRepository postRepository;
@@ -40,22 +42,11 @@ public class PostService {
         return postRepository.save(PostEntity.from(post)).toModel();
     }
 
+    @Transactional(readOnly = true)
     public Post readById(Long postId, Long userId) {
         PostEntity entity = postRepository.findById(postId).orElseThrow();
         viewCountService.increase(postId, userId);
         return entity.toModel();
-    }
-
-    public Long getCurrentViewCount(Long postId) {
-        return viewCountService.getCurrentViewCount(postId);
-    }
-
-    public User getUser(Long userId) {
-        return userService.readById(userId);
-    }
-
-    public Category getCategory(Long categoryId) {
-        return categoryService.getCategory(categoryId);
     }
 
     public Post update(List<MultipartFile> newImages, List<String> deletedImages, PostUpdateRequest request, Long userId, Long postId) throws JsonProcessingException {
@@ -72,12 +63,14 @@ public class PostService {
         postRepository.delete(entity);
     }
 
+    @Transactional(readOnly = true)
     public Page<PostSearchResponse> searchPostByCond(PostSearchCondition condition, Pageable pageable, String sort) {
         Page<PostSearchResponse> postSearchResponses = postQueryRepository.searchByCond(condition, pageable, sort);
         allocateViewCountOfPost(postSearchResponses);
         return postSearchResponses;
     }
 
+    @Transactional(readOnly = true)
     public Slice<PostSearchResponse> searchPostByCondAsInfinite(PostSearchCondition condition, Pageable pageable, String sort) {
         Slice<PostSearchResponse> sliceResponse = postQueryRepository.searchBySearchCondInfiniteScroll(condition, pageable, sort);
         allocateViewCountOfPost(sliceResponse);
@@ -94,5 +87,17 @@ public class PostService {
         for (PostSearchResponse postSearchResponse : postSearchResponses) {
             postSearchResponse.allocateCurrentViewCount(viewCountService.getCurrentViewCount(postSearchResponse.getPostId()));
         }
+    }
+
+    public Long getCurrentViewCount(Long postId) {
+        return viewCountService.getCurrentViewCount(postId);
+    }
+
+    public User getUser(Long userId) {
+        return userService.readById(userId);
+    }
+
+    public Category getCategory(Long categoryId) {
+        return categoryService.getCategory(categoryId);
     }
 }
