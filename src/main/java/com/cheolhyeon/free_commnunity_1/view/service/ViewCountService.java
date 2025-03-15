@@ -17,7 +17,7 @@ public class ViewCountService {
     private final ViewCountDistributedLockRepository viewCountDistributedLockRepository;
 
     public Long increase(Long postId, Long userId) {
-        if (!viewCountDistributedLockRepository.lock(postId, userId, TTL)) {
+        if (viewCountDistributedLockRepository.lock(postId, userId, TTL)) {
             return viewCountRedisRepository.read(postId);
         }
 
