@@ -19,6 +19,10 @@ public class PostLikeService {
         return likePost(postId, userId);
     }
 
+    public Long getCurrentPostLikeCount(Long postId) {
+        return likeRedisRepository.getCurrentPostLikeCount(postId);
+    }
+
     private Long likePost(Long postId, Long userId) {
         queryRedisRepository.insert(postId, userId);
         return likeRedisRepository.increment(postId);
