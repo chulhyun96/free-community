@@ -30,7 +30,7 @@ class CommentLikeQueryRedisRepositoryTest {
     private final Long commentId = 100L;
 
     @Test
-    @DisplayName("특정 유저가 특정 댓글에 좋아요를 이미 눌렀다")
+    @DisplayName("특정 유저가 특정 댓글에 좋아요를 이미 누른 경우 true를 반환한다.")
     void returnTrueWhenUserClickedLikeFirst() {
         //given
         String toggleKey = "comment_toggle:users:1:comments:100";
