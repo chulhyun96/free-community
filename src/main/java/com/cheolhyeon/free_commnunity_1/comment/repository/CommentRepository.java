@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
-    @Query("SELECT c FROM CommentEntity c WHERE c.postId = :postId ORDER BY c.parentCommentId, c.createdAt ASC")
-    List<CommentEntity> findByPostIdOrderByCreatedAtAsc(Long postId);
+    @Query("SELECT c FROM CommentEntity c WHERE c.postId = :postId ORDER BY c.parentCommentId, c.createdAt ASC limit 20")
+    List<CommentEntity> findTop20ByPostIdOrderByCreatedAtAsc(Long postId);
 
     Optional<CommentEntity> findByPostIdAndCommentId(Long postId, Long commentId);
 

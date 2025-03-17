@@ -20,6 +20,11 @@ Content-Type: image/png  # ✅ 파일 타입 명시
 < /Users/cheolhyeon/desktop/오잉??.png
 --WebAppBoundary--
 
+### GET 무한스크롤
+GET localhost:8080/posts-infinite
+
+### GET 페이징
+GET localhost:8080/posts
 
 ### GET
 GET localhost:8080/posts/5

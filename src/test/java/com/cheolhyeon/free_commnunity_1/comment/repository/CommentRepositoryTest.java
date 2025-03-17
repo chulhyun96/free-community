@@ -41,7 +41,7 @@ class CommentRepositoryTest {
 
     @Test
     @DisplayName("Post Id에 맞는 Comment 끌고오기 (오래된 순 정렬)")
-    void findByPostIdOrderByCreatedAtAsc() {
+    void findTop20ByPostIdOrderByCreatedAtAsc() {
         //given
         Long postId = 10L;
 
@@ -78,7 +78,7 @@ class CommentRepositoryTest {
         commentRepository.save(comment3);
 
         //when
-        List<CommentEntity> result = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+        List<CommentEntity> result = commentRepository.findTop20ByPostIdOrderByCreatedAtAsc(postId);
         for (CommentEntity commentEntity : result) {
             System.out.println("commentEntity = " + commentEntity);
         }

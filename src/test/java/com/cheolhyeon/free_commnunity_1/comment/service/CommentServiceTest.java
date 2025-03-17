@@ -85,7 +85,7 @@ class CommentServiceTest {
     void readOrderByCreateAtComment() {
         //given
         List<CommentEntity> comments = createCommentEntities();
-        given(commentRepository.findByPostIdOrderByCreatedAtAsc(1L)).willReturn(comments);
+        given(commentRepository.findTop20ByPostIdOrderByCreatedAtAsc(1L)).willReturn(comments);
 
         //when
         List<CommentReadResponse> result = commentService.readOrderByCreateAt(1L);
