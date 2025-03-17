@@ -54,4 +54,15 @@ class PostLikeServiceTest {
         then(likeRedisRepository).should(times(1)).decrement(anyLong());
         then(queryRedisRepository).should(times(1)).delete(anyLong(), anyLong());
     }
+    @Test
+    @DisplayName("특정 게시글의 현재 좋아요 수를 가지고 온다")
+    void getCurrentPostLikeCount() {
+        //given
+        given(postLikeService.getCurrentPostLikeCount(anyLong()))
+                .willReturn(1L);
+        //when
+        Long likeCount = postLikeService.getCurrentPostLikeCount(5L);
+        //then
+        assertThat(likeCount).isEqualTo(1L);
+    }
 }
