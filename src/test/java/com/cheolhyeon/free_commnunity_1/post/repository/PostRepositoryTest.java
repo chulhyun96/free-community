@@ -10,6 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +39,7 @@ class PostRepositoryTest {
             PostEntity post = PostEntity.builder()
                     .title("안녕 제목 " + i)
                     .content("안녕 내용 " + i)
-                    .createdAt(LocalDateTime.now())
+                    .createdAt(LocalDate.of(2025, 1, 1).atStartOfDay())
                     .build();
             postRepository.save(post);
         }
@@ -51,8 +52,8 @@ class PostRepositoryTest {
         postRepository.save(post);
 
         //when
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.now().plusDays(1).atStartOfDay();
+        LocalDateTime startOfDay = LocalDate.of(2025, 1, 1).atStartOfDay();
+        LocalDateTime endOfDay = LocalDate.of(2025, 1, 1).atTime(LocalTime.MAX);
         List<PostEntity> postsByDateOfToday = postRepository.findPostsByDate(startOfDay, endOfDay);
 
         //then

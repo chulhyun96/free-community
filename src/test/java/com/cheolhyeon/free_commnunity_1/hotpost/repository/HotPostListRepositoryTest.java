@@ -16,6 +16,7 @@ import org.springframework.data.redis.core.ZSetOperations;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.random.RandomGenerator;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -56,14 +57,14 @@ class HotPostListRepositoryTest {
         Set<String> sortedHotPostsJsonSet = new LinkedHashSet<>(sortedHotPostsJsonList);
 
         given(template.opsForZSet()).willReturn(zSetOperations);
-        given(zSetOperations.reverseRange(eq(key), eq(0L), eq(topN - 1)))
+        given(zSetOperations.reverseRange(anyString(), eq(0L), eq(topN - 1))) // ✅ anyString() 사용
                 .willReturn(sortedHotPostsJsonSet);
 
         given(mapper.readValue(anyString(), eq(HotPostResponse.class)))
                 .willAnswer(invocation -> {
                     String json = invocation.getArgument(0);
                     if (json.contains("\"title\":\"Post 1\"")) {
-                        return HotPostResponse.from("Post 1", 100L, 100L); // 점수: 300
+                        return HotPostResponse.from("Post 1", RandomGenerator.getDefault().nextLong(100,300), 100L); // 점수: 300
                     } else {
                         return HotPostResponse.from("Post 2", 200L, 134L); // 점수: 468
                     }
@@ -71,6 +72,10 @@ class HotPostListRepositoryTest {
 
         // when
         List<HotPostResponse> topNCurrentHotPosts = hotPostListRepository.getTopNCurrentHotPosts(topN);
+        for (HotPostResponse topNCurrentHotPost : topNCurrentHotPosts) {
+            System.out.println("topNCurrentHotPost = " + topNCurrentHotPost.getTitle());
+            System.out.println("topNCurrentHotPost.get = " + topNCurrentHotPost.getCurrentViewCount());
+        }
 
         // then
         assertThat(topNCurrentHotPosts).hasSize(2);

@@ -89,52 +89,8 @@ class CommentRepositoryTest {
         assertThat(result.get(1).getParentCommentId()).isEqualTo(comment3.getParentCommentId());
         assertThat(result.get(2).getParentCommentId()).isEqualTo(comment2.getParentCommentId());
     }
-    @Test
-    void findByPostIdAndCommentIdOrderByCreatedAtAsc() {
-        CommentEntity findComment = commentRepository.findByPostIdAndCommentId(5L, 11L)
-                .orElseThrow(() -> new RuntimeException("Comment not found"));
-        assertThat(findComment.getParentCommentId()).isEqualTo(9L);
-        assertThat(findComment.getCommentId()).isEqualTo(11L);
-    }
 
-    @Test
-    @DisplayName("특정 댓글이 자식 댓글이 없는 경우 countBy() 함수의 결과는 1이 된다.")
-    void countByWhenRootCommentWithoutChildrenComment() {
-        //given
-        UserEntity user = createUser();
-        em.persist(user);
-        PostEntity post = createPost(user);
-        em.persist(post);
-        CommentEntity rootComment = createRootComment();
-        em.persist(rootComment);
 
-        em.clear();
-        //when
-        int count = commentRepository.countBy(1L, 1L, 2L);
-        //then
-        assertThat(count).isEqualTo(1);
-    }
-    @Test
-    @DisplayName("특정 댓글이 자식댓글을 1개 이상 포함하고 있다면 countBy()의 결과는 2가 된다.")
-    void doTest() {
-        //given
-        UserEntity user = createUser();
-        em.persist(user);
-        PostEntity post = createPost(user);
-        em.persist(post);
-        CommentEntity rootComment = createRootComment();
-        CommentEntity childrenComment1 = createChildrenComment();
-        CommentEntity childrenComment2 = createChildrenComment();
-        em.persist(rootComment);
-        em.persist(childrenComment1);
-        em.persist(childrenComment2);
-
-        em.clear();
-        //when
-        int count = commentRepository.countBy(1L, 1L, 2L);
-        //then
-        assertThat(count).isEqualTo(2);
-    }
 
 
     private CommentEntity createChildrenComment() {

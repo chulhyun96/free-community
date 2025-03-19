@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -33,15 +32,13 @@ public class HotPostUpdater {
 
     //    @Scheduled(cron = "0 0 * * * *")
     @Scheduled(fixedRate = 10000)
-    public void updateHotPosts() {
+    private void updateHotPosts() {
         List<PostEntity> postsByDateOfToday = getNewPostsFromDB();
         List<HotPostResponse> newPosts = getNewPostsWithTotalScore(postsByDateOfToday);
 
         List<HotPostResponse> allPosts = getMixedPrePostsWith(newPosts, TOP_N);
 
-        List<HotPostResponse> newSortedHotPosts = getNewSortedHotPosts(allPosts, TOP_N);
-
-        hotPostListRepository.updateTopHotPosts(newSortedHotPosts);
+        hotPostListRepository.updateTopHotPosts(allPosts);
     }
 
     private List<HotPostResponse> getMixedPrePostsWith(List<HotPostResponse> newHotPosts, long limit) {
@@ -51,12 +48,6 @@ public class HotPostUpdater {
         return allPosts;
     }
 
-    private List<HotPostResponse> getNewSortedHotPosts(List<HotPostResponse> allPosts, long limit) {
-        return allPosts.stream()
-                .sorted(Comparator.comparing(HotPostResponse::getTotalScore).reversed())
-                .limit(limit)
-                .toList();
-    }
 
     private List<HotPostResponse> getNewPostsWithTotalScore(List<PostEntity> newPosts) {
         List<HotPostResponse> newHotPosts = new ArrayList<>();
