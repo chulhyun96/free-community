@@ -7,7 +7,9 @@ import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
+import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
+import com.cheolhyeon.free_commnunity_1.user.type.ActionPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,12 +29,13 @@ public class CommentService {
     private final CommentLikeService commentLikeService;
 
     public Comment create(Long postId, CommentCreateRequest request) {
-        userService.readById(request.getUserId());
+        UserEntity user = userService.getUserEntity(request.getUserId());
         Comment parent = findParentComment(request);
         CommentEntity entity = commentRepository.save(
                 CommentEntity.from(request, parent, postId)
         );
         entity.assignSelfAsParentIfRoot(parent);
+        user.allocateActionPoint(ActionPoint.COMMENT);
         return entity.toModel();
     }
 
