@@ -11,7 +11,9 @@ import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
+import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
+import com.cheolhyeon.free_commnunity_1.user.type.ActionPoint;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +38,11 @@ public class PostService {
     private final PostQueryRepository postQueryRepository;
 
     public Post create(List<MultipartFile> images, PostCreateRequest request, Long userId) throws JsonProcessingException {
-        User user = userService.readById(userId);
+        UserEntity user = userService.getUserEntity(userId);
         String jsonAsString = imageStrategy.formatToSave(images);
         Post post = Post.from(request, user.getId(), jsonAsString);
+        user.allocateActionPoint(ActionPoint.POST);
+
         return postRepository.save(PostEntity.from(post)).toModel();
     }
 
