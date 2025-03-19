@@ -83,7 +83,8 @@ class PostServiceTest {
     @DisplayName("PostService Create 메서드 테스트")
     void create() throws JsonProcessingException {
         // Given
-        given(userService.readById(anyLong())).willReturn(createUserWithOnlyId(1L));
+        User userWithOnlyId = createUserWithOnlyId(1L);
+        given(userService.readById(anyLong())).willReturn(userWithOnlyId);
         given(imageStrategy.formatToSave(anyList())).willReturn(localImages1);
 
         ArgumentCaptor<PostEntity> postEntityCaptor = ArgumentCaptor.forClass(PostEntity.class);
@@ -97,6 +98,7 @@ class PostServiceTest {
         assertThat(savedEntity.getTitle()).isEqualTo("제목");
         assertThat(savedEntity.getContent()).isEqualTo("내용");
         assertThat(savedEntity.getUserId()).isEqualTo(userId);
+        assertThat(userWithOnlyId.getActionPoint()).isEqualTo(1);
         then(userService).should().readById(anyLong());
         then(postRepository).should().save(any());
     }
@@ -565,6 +567,6 @@ class PostServiceTest {
     }
 
     private User createUserWithOnlyId(Long id) {
-        return User.builder().id(id).build();
+        return User.builder().id(id).actionPoint(0L).build();
     }
 }
