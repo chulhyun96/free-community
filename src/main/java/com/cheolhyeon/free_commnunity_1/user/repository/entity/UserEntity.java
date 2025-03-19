@@ -2,6 +2,7 @@ package com.cheolhyeon.free_commnunity_1.user.repository.entity;
 
 
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
+import com.cheolhyeon.free_commnunity_1.user.type.ActionPoint;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,5 +45,9 @@ public class UserEntity {
     public void update(User model) {
         this.nickname = model.getNickname();
         this.updatedAt = model.getUpdatedAt();
+    }
+
+    public void allocateActionPoint(ActionPoint actionPoint) {
+        this.actionPoint += actionPoint.getPoint();
     }
 }

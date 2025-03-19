@@ -2,6 +2,7 @@ package com.cheolhyeon.free_commnunity_1.user.domain;
 
 import com.cheolhyeon.free_commnunity_1.user.controller.request.UserCreateRequest;
 import com.cheolhyeon.free_commnunity_1.user.controller.request.UserUpdateRequest;
+import com.cheolhyeon.free_commnunity_1.user.type.ActionPoint;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,5 +43,18 @@ class UserTest {
         //then
         Assertions.assertThat(update.getNickname()).isEqualTo(updateUser.getNickname());
         Assertions.assertThat(update.getUpdatedAt()).isEqualTo(time);
+    }
+    @Test
+    @DisplayName("게시글 생성 당 ActionPoint를 얻는다")
+    void getActionPint() {
+        //given
+        User user = User.builder()
+                .actionPoint(0L)
+                .nickname("기존 닉네임")
+                .build();
+        //when
+        user.allocateActionPoint(ActionPoint.POST);
+        //then
+        Assertions.assertThat(user.getActionPoint()).isEqualTo(1);
     }
 }
