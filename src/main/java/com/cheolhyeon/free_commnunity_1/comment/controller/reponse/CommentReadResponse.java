@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
@@ -46,7 +47,13 @@ public class CommentReadResponse {
                 .content(comment.getContent())
                 .likeCount(likeCount)
                 .createdAt(comment.getCreatedAt())
-                .replies(of(comment.getReplies(), likeReaderBoard)) // 대댓글도 재귀적으로 변환
+                .replies(of(comment.getReplies(), likeReaderBoard))
                 .build();
+    }
+
+    public static List<CommentReadResponse> orderByLikesCountDesc(List<CommentReadResponse> responses) {
+        return responses.stream()
+                .sorted(Comparator.comparingLong(CommentReadResponse::getLikeCount).reversed())
+                .toList();
     }
 }

@@ -6,7 +6,7 @@ Content-Type: multipart/form-data; boundary=WebAppBoundary
 Content-Disposition: form-data; name="post"
 Content-Type: application/json
 
-{"categoryId":1, "title":"안녕하세요1123", "content":"반갑습니다2123123"}
+{"categoryId":1, "title":"안녕하세요1", "content":"반갑습니다2123123"}
 --WebAppBoundary
 Content-Disposition: form-data; name="file"; filename="test.png"
 Content-Type: image/png  # ✅ 파일 타입 명시
@@ -30,6 +30,6 @@ GET localhost:8080/posts
 GET localhost:8080/posts/5
 X-User-Id: 4
 
-
-
+### 인기글 가져오기
+GET http://localhost:8080/posts/hot
 

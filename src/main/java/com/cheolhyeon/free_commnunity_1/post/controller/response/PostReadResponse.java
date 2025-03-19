@@ -20,11 +20,12 @@ public class PostReadResponse {
     private String imageUrl;
     private String categoryName;
     private Long viewCount;
-    private List<CommentReadResponse> comments;
     private int commentCount;
+    private Long likeCount;
+    private List<CommentReadResponse> comments;
     private LocalDateTime updatedAt;
 
-    public static PostReadResponse from(Post post, Long currentViewCount, String writer, String categoryName, List<CommentReadResponse> comments, int commentCount) {
+    public static PostReadResponse from(Post post, Long currentViewCount, String writer, String categoryName, List<CommentReadResponse> comments, Long currentPostLikeCount, int commentCount) {
         PostReadResponse response = new PostReadResponse();
         response.title = post.getTitle();
         response.content = post.getContent();
@@ -34,6 +35,7 @@ public class PostReadResponse {
         response.viewCount = currentViewCount;
         response.updatedAt = post.getUpdatedAt();
         response.commentCount = commentCount;
+        response.likeCount = currentPostLikeCount;
         response.comments = comments;
         return response;
     }

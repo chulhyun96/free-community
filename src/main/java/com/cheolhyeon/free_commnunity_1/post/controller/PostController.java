@@ -11,6 +11,7 @@ import com.cheolhyeon.free_commnunity_1.post.controller.response.PostSearchRespo
 import com.cheolhyeon.free_commnunity_1.post.controller.search.PostSearchCondition;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
+import com.cheolhyeon.free_commnunity_1.postlike.service.PostLikeService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PostController {
     private final PostService postService;
+    private final PostLikeService postLikeService;
     private final CommentService commentService;
 
     @PostMapping("/posts")
@@ -64,9 +66,9 @@ public class PostController {
 
         Post post = postService.readById(postId, userId);
         Long currentViewCount = postService.getCurrentViewCount(postId);
+        Long currentPostLikeCount = postLikeService.getCurrentPostLikeCount(postId);
         User user = postService.getUser(userId);
         Category category = postService.getCategory(post.getCategoryId());
-
         List<CommentReadResponse> comments = "likes".equals(sort)
                 ? commentService.readOrderByCommentLikes(postId)
                 : commentService.readOrderByCreateAt(postId);
@@ -77,6 +79,7 @@ public class PostController {
                 user.getNickname(),
                 category.getName(),
                 comments,
+                currentPostLikeCount,
                 commentService.getCommentsCount(comments)
         ));
     }

@@ -14,10 +14,12 @@ public class PostLikeQueryRedisRepository {
         String key = generateKey(postId, userId);
         return Boolean.TRUE.equals(postLikeRedisTemplate.hasKey(key));
     }
+
     public void insert(Long postId, Long userId) {
         String key = generateKey(postId, userId);
         postLikeRedisTemplate.opsForValue().set(key, "");
     }
+
     public void delete(Long postId, Long userId) {
         String key = generateKey(postId, userId);
         postLikeRedisTemplate.delete(key);

@@ -23,7 +23,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.*;
 import org.springframework.mock.web.MockMultipartFile;
@@ -110,7 +109,7 @@ class PostServiceTest {
         given(viewCountService.increase(postId, userId)).willReturn(1L);
         //when
         Post readPost = postService.readById(postId, userId);
-        PostReadResponse response = PostReadResponse.from(readPost, 1L, "User", Category.GENERAL.getName(), null, 0);
+        PostReadResponse response = PostReadResponse.from(readPost, 1L, "User", Category.GENERAL.getName(), null, 0L, 0);
         //then
 
         assertThat(readPost.getTitle()).isEqualTo(response.getTitle());
@@ -490,6 +489,7 @@ class PostServiceTest {
                 .extracting(PostSearchResponse::getViewCount)
                 .isSortedAccordingTo(Comparator.reverseOrder());
     }
+
     @Test
     @DisplayName("특정 게시글 조회 시 해당 게시글의 현재 조회수를 가지고 온다")
     void getCurrentViewCount() {
@@ -501,6 +501,7 @@ class PostServiceTest {
         //then
         assertThat(currentViewCount).isEqualTo(2L);
     }
+
     @Test
     @DisplayName("특정 유저 조회 시 해당 유저의 정보를 가지고 온다")
     void getUser() {
@@ -524,6 +525,7 @@ class PostServiceTest {
                 )
                 .containsExactly(1L, 100L, "안녕하세요");
     }
+
     @Test
     @DisplayName("카테고리 ID로 특정 카테고리 조회 시 해당 Category객체가 반환된다")
     void getCategory() {
@@ -537,6 +539,7 @@ class PostServiceTest {
                 .extracting(Category::getId, Category::getName)
                 .contains(1L, "자유게시판");
     }
+
     private Page<PostSearchResponse> getPostSearchResponses(PageRequest pageRequest) {
         List<PostSearchResponse> postSearchResponses = Stream.of(
                         new PostSearchResponse(1L, "테스트 제목1", "GENERAL", 0L, LocalDateTime.now().withYear(2024).minusMonths(2)),

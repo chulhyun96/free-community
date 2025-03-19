@@ -60,4 +60,17 @@ public class RedisConfig {
     public StringRedisTemplate postLikeRedisTemplate(@Qualifier("postLikeRedisConnectionFactory") RedisConnectionFactory commentLikeRedisConnectionFactory) {
         return new StringRedisTemplate(commentLikeRedisConnectionFactory);
     }
+
+    @Bean
+    public RedisConnectionFactory hotPostRedisConnectionFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setDatabase(3);
+        return new LettuceConnectionFactory(configuration);
+    }
+
+    @Bean
+    public StringRedisTemplate hotPostRedisTemplate(@Qualifier("hotPostRedisConnectionFactory") RedisConnectionFactory commentLikeRedisConnectionFactory) {
+        return new StringRedisTemplate(commentLikeRedisConnectionFactory);
+    }
+
 }

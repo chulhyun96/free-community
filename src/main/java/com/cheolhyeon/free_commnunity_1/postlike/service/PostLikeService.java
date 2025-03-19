@@ -12,14 +12,14 @@ public class PostLikeService {
     private final PostLikeQueryRedisRepository queryRedisRepository;
 
     public Long toggleLike(Long postId, Long userId) {
-        boolean isAlreadyLiked = queryRedisRepository.isLikedByUserIdAndPostId(userId, postId);
+        boolean isAlreadyLiked = queryRedisRepository.isLikedByUserIdAndPostId(postId, userId);
         if (isAlreadyLiked) {
             return unlikePost(postId, userId);
         }
         return likePost(postId, userId);
     }
 
-    public Long getCurrentPostLikeCount(Long postId) {
+        public Long getCurrentPostLikeCount(Long postId) {
         return likeRedisRepository.getCurrentPostLikeCount(postId);
     }
 

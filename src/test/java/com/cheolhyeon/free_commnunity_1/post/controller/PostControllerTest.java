@@ -12,6 +12,7 @@ import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.LocalImageFormatter;
 import com.cheolhyeon.free_commnunity_1.post.service.PostService;
+import com.cheolhyeon.free_commnunity_1.postlike.service.PostLikeService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,6 +60,9 @@ class PostControllerTest {
 
     @MockitoBean
     CommentService commentService;
+
+    @MockitoBean
+    PostLikeService postLikeService;
 
     @Mock
     ImageStrategy formatter;

@@ -14,6 +14,7 @@ public class CommentLikeQueryRedisRepository {
         String key = generateKey(userId, commentId);
         return contains(key);
     }
+
     public void insert(Long userId, Long commentId) {
         String key = generateKey(userId, commentId);
         commentLikeRedisTemplate.opsForValue().set(key, "");
