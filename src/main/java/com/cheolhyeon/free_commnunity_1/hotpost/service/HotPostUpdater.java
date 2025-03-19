@@ -30,9 +30,8 @@ public class HotPostUpdater {
         return hotPostListRepository.getTopNCurrentHotPosts(limit);
     }
 
-    //    @Scheduled(cron = "0 0 * * * *")
-    @Scheduled(fixedRate = 10000)
-    private void updateHotPosts() {
+    @Scheduled(cron = "0 0 * * * *")
+    public void updateHotPosts() {
         List<PostEntity> postsByDateOfToday = getNewPostsFromDB();
         List<HotPostResponse> newPosts = getNewPostsWithTotalScore(postsByDateOfToday);
 

@@ -42,7 +42,7 @@ class HotPostControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/posts/hot"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.size()").value(2))
-                .andExpect(jsonPath("$[0].title").value("Post 1")) // ✅ 가장 높은 점수
-                .andExpect(jsonPath("$[1].title").value("Post 2")); // ✅ 두 번째 높은 점수*
+                .andExpect(jsonPath("$[0].title").value("Post 1"))
+                .andExpect(jsonPath("$[1].title").value("Post 2"));
     }
 }

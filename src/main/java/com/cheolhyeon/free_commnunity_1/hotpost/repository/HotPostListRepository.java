@@ -17,17 +17,17 @@ import java.util.Set;
 @Repository
 @RequiredArgsConstructor
 public class HotPostListRepository {
-    private static final String HOT_POST_KEY = "hotPost:%s:" + System.currentTimeMillis();
+    private static final String HOT_POST_KEY = "hotPost:%s";
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd");
 
     private final StringRedisTemplate hotPostRedisTemplate;
     private final ObjectMapper mapper;
 
 
-    public void updateTopHotPosts(List<HotPostResponse> newSortedHotPosts) {
+    public void updateTopHotPosts(List<HotPostResponse> allPosts) {
         String key = generateKey(LocalDateTime.now());
         hotPostRedisTemplate.opsForZSet().removeRange(key, 0, -1);
-        for (HotPostResponse newSortedHotPost : newSortedHotPosts) {
+        for (HotPostResponse newSortedHotPost : allPosts) {
             try {
                 String newPostAsJson = mapper.writeValueAsString(newSortedHotPost);
                 hotPostRedisTemplate.opsForZSet().add(key, newPostAsJson, newSortedHotPost.getTotalScore());
