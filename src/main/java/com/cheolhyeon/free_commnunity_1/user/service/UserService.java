@@ -23,9 +23,15 @@ public class UserService {
         return userRepository.save(entity).toModel();
     }
 
+    @Transactional(readOnly = true)
     public User readById(Long userId) {
         UserEntity entity = userRepository.findById(userId).orElseThrow();
         return entity.toModel();
+    }
+
+    @Transactional(readOnly = true)
+    public UserEntity getUserEntity(Long userId) {
+        return userRepository.findById(userId).orElseThrow();
     }
 
     public User updateById(Long userId, UserUpdateRequest request, LocalDateTime updatedAt) {
@@ -34,4 +40,5 @@ public class UserService {
         entity.update(model);
         return model;
     }
+
 }
