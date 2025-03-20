@@ -2,6 +2,7 @@ package com.cheolhyeon.free_commnunity_1.comment.repository;
 
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
+import com.cheolhyeon.free_commnunity_1.common.domain.DateManager;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import org.junit.jupiter.api.DisplayName;
@@ -90,7 +91,19 @@ class CommentRepositoryTest {
         assertThat(result.get(2).getParentCommentId()).isEqualTo(comment2.getParentCommentId());
     }
 
+    @Test
+    @DisplayName("특정 유저가 최근 1달 이내의 댓글 목록을 불러온다.")
+    void findByUserIdAndDate() {
+        //given
+        DateManager dateManager = new DateManager(LocalDateTime.now());
+        LocalDateTime endDate = dateManager.getLocalDateNow();
+        LocalDateTime startDate = dateManager.getMinusMonthsAsLocalDate(1);
+        //when
+        List<CommentEntity> result = commentRepository.findByUserIdAndDate(5L, startDate, endDate);
 
+        //then
+        assertThat(result).isNotEmpty();
+    }
 
 
     private CommentEntity createChildrenComment() {
