@@ -5,6 +5,7 @@ import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
@@ -22,5 +23,8 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
             nativeQuery = true
     )
     int countBy(@Param("postId") Long postId, @Param("parentCommentId") Long parentCommentId, @Param("limit") long limit);
+
+    @Query("select c from CommentEntity c where c.userId = :userId and c.createdAt between :startDate and :endDate")
+    List<CommentEntity> findByUserIdAndDate(@Param("userId") Long userId, @Param("startDate")LocalDateTime startDate, @Param("endDate")LocalDateTime endDate);
 }
 
