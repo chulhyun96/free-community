@@ -13,7 +13,7 @@ public class DateManager {
         return localDateTime.toLocalDate().minusMonths(months).atStartOfDay();
     }
 
-    public LocalDateTime getLocalDateTimeNow() {
+    public LocalDateTime getLocalDateNow() {
         return localDateTime.toLocalDate().atStartOfDay();
     }
 }
