@@ -16,4 +16,8 @@ public interface PostRepository extends JpaRepository<PostEntity, Long> {
 
     @Query("select p from PostEntity p where p.createdAt >= :startOfDay and p.createdAt < :endOfDay")
     List<PostEntity> findPostsByDate(@Param("startOfDay") LocalDateTime startOfDay, @Param("endOfDay") LocalDateTime endOfDay);
+
+    @Query("select p from PostEntity p where p.userId = :userId and p.createdAt between :startDate and :endDate")
+    List<PostEntity> findByUserIdAndDate(@Param("userId") Long userId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
+
 }
