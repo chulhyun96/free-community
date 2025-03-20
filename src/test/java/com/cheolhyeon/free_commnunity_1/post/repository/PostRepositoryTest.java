@@ -1,5 +1,6 @@
 package com.cheolhyeon.free_commnunity_1.post.repository;
 
+import com.cheolhyeon.free_commnunity_1.common.domain.DateManager;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -58,5 +59,18 @@ class PostRepositoryTest {
 
         //then
         assertThat(postsByDateOfToday).hasSize(10);
+    }
+
+    @Test
+    @DisplayName("특정 User가 작성한 List<PostEntity>를 userId로 검색해서 불러온다.")
+    void findByUserIdAndDate() {
+        //given
+        DateManager dateManager = new DateManager(LocalDateTime.now());
+        LocalDateTime startDate = dateManager.getMinusMonthsAsLocalDate(1);
+        LocalDateTime endDate = dateManager.getLocalDateNow();
+        //when
+        List<PostEntity> resulst = postRepository.findByUserIdAndDate(4L, endDate, startDate);
+        //then
+        assertThat(resulst).isNotEmpty();
     }
 }
