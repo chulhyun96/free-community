@@ -47,8 +47,8 @@ class HotPostUpdaterTest {
     @DisplayName("DB에서 오늘 생성된 게시글을 불러온다")
     void getNewPostsFromDB() {
         //given
-        LocalDateTime startDate = LocalDateTime.of(2025, 3, 19, 0, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(2025, 3, 20, 0, 0, 0);
+        LocalDateTime startDate = LocalDateTime.of(2025, 3, 21, 0, 0, 0);
+        LocalDateTime endDate = LocalDateTime.of(2025, 3, 22, 0, 0, 0);
 
         //when
         hotPostUpdater.updateHotPosts();
