@@ -9,7 +9,7 @@ public class DateManager {
         this.localDateTime = localDateTime;
     }
 
-    public LocalDateTime getMinusMonthsAsLocalDate(long months) {
+    public LocalDateTime getMinusMonthsFromNow(long months) {
         return localDateTime.toLocalDate().minusMonths(months).atStartOfDay();
     }
 

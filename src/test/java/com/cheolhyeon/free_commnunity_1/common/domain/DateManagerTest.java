@@ -16,7 +16,7 @@ class DateManagerTest {
         DateManager dateManager = new DateManager(LocalDateTime.of(2025, 3, 1, 0, 0));
 
         //when
-        LocalDateTime minusMonthsAsLocalDate = dateManager.getMinusMonthsAsLocalDate(1);
+        LocalDateTime minusMonthsAsLocalDate = dateManager.getMinusMonthsFromNow(1);
 
         //then
         assertThat(minusMonthsAsLocalDate).isEqualTo(LocalDateTime.of(2025, 2, 1, 0, 0));
