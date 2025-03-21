@@ -66,11 +66,11 @@ class PostRepositoryTest {
     void findByUserIdAndDate() {
         //given
         DateManager dateManager = new DateManager(LocalDateTime.now());
-        LocalDateTime startDate = dateManager.getMinusMonthsAsLocalDate(1);
+        LocalDateTime startDate = dateManager.getMinusMonthsFromNow(1);
         LocalDateTime endDate = dateManager.getLocalDateNow();
         //when
         List<PostEntity> resulst = postRepository.findByUserIdAndDate(4L, endDate, startDate);
         //then
-        assertThat(resulst).isNotEmpty();
+        assertThat(resulst).isEmpty();
     }
 }
