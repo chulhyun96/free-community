@@ -7,9 +7,9 @@ import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.controller.request.UserCreateRequest;
 import com.cheolhyeon.free_commnunity_1.user.controller.request.UserUpdateRequest;
-import com.cheolhyeon.free_commnunity_1.user.controller.response.CommentHistory;
-import com.cheolhyeon.free_commnunity_1.user.controller.response.PostHistory;
 import com.cheolhyeon.free_commnunity_1.user.controller.response.UserHistoryResponse;
+import com.cheolhyeon.free_commnunity_1.user.domain.CommentHistory;
+import com.cheolhyeon.free_commnunity_1.user.domain.PostHistory;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.repository.UserRepository;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
@@ -57,7 +57,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserHistoryResponse getHistory(Long userId) {
         DateManager dateManager = new DateManager(LocalDateTime.now());
-        LocalDateTime startDate = dateManager.getMinusMonthsAsLocalDate(1);
+        LocalDateTime startDate = dateManager.getMinusMonthsFromNow(1);
         LocalDateTime endDate = dateManager.getLocalDateNow();
 
         UserHistoryResponse userHistory = new UserHistoryResponse();
@@ -71,14 +71,8 @@ public class UserService {
         if (postsHistory.isEmpty()) {
             return;
         }
-        postsHistory.forEach(postEntity -> {
-            Long currentViewCount = viewCountService.getCurrentViewCount(postEntity.getId());
-            userHistory.addPostHistory(
-                    PostHistory.of(
-                            postEntity.getId(),
-                            postEntity.getTitle(),
-                            currentViewCount));
-        });
+        PostHistory history = PostHistory.from(postsHistory);
+        history.addHistory(userHistory, viewCountService);
     }
 
     private void addCommentHistory(Long userId, LocalDateTime startDate, LocalDateTime endDate, UserHistoryResponse userHistory) {
@@ -86,13 +80,7 @@ public class UserService {
         if (commentsHistory.isEmpty()) {
             return;
         }
-        commentsHistory.forEach(commentEntity -> {
-            String postTitle = userHistory.getPostTitle(commentEntity.getPostId());
-            userHistory.addCommentHistory(
-                    CommentHistory.of(
-                            commentEntity.getCommentId(),
-                            postTitle,
-                            commentEntity.getContent()));
-        });
+        CommentHistory history = CommentHistory.from(commentsHistory);
+        history.addHistory(userHistory);
     }
 }
