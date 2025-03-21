@@ -7,7 +7,7 @@ import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
-import com.cheolhyeon.free_commnunity_1.user.domain.User;
+import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -61,10 +61,10 @@ class CommentServiceTest {
                 .content("안녕하세요")
                 .build();
 
-        User mockUser = mock(User.class);
+        UserEntity mockUser = mock(UserEntity.class);
         Comment expectedComment = mock(Comment.class);
 
-        given(userService.readById(userId)).willReturn(mockUser);
+        given(userService.getUserEntity(userId)).willReturn(mockUser);
         given(commentRepository.save(any(CommentEntity.class))).willReturn(savedEntity);
         given(savedEntity.toModel()).willReturn(expectedComment);
 
@@ -73,7 +73,6 @@ class CommentServiceTest {
 
         // Then
         assertThat(comment).isEqualTo(expectedComment);
-        then(userService).should().readById(userId);
         then(commentRepository).should().save(any(CommentEntity.class));
         then(savedEntity).should().assignSelfAsParentIfRoot(null);
         then(savedEntity).should().toModel();
