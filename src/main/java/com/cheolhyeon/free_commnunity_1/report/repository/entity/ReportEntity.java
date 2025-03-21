@@ -1,5 +1,7 @@
 package com.cheolhyeon.free_commnunity_1.report.repository.entity;
 
+import com.cheolhyeon.free_commnunity_1.report.controller.request.ReportRequest;
+import com.cheolhyeon.free_commnunity_1.report.type.ReportReason;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -17,19 +19,32 @@ public class ReportEntity {
     @Id
     private Long reportId;
 
-    private String reporterName;
-    private String reportedName;
-    private String reason;
+    private Long reporterId;
+    private Long targetId;
+
+    @Enumerated(EnumType.STRING)
+    private ReportReason reason;
 
     @Enumerated(EnumType.STRING)
     private ReportType reportType;
 
     @Builder
-    private ReportEntity(Long reportId, String reporterName, String reportedName, String reason, ReportType reportType) {
+    private ReportEntity(Long reportId, Long reporterId, Long targetId, ReportReason reason, ReportType reportType) {
         this.reportId = reportId;
-        this.reporterName = reporterName;
-        this.reportedName = reportedName;
+        this.reporterId = reporterId;
+        this.targetId = targetId;
         this.reason = reason;
         this.reportType = reportType;
     }
+
+    public static ReportEntity from(ReportRequest request) {
+        ReportEntity reportEntity = new ReportEntity();
+        reportEntity.reporterId = request.getReportId();
+        reportEntity.targetId = request.getTargetId();
+        reportEntity.reason = request.getReason();
+        reportEntity.reportType = request.getReportType();
+        return reportEntity;
+    }
+
+
 }
