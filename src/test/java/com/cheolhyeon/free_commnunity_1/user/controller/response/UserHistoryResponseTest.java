@@ -11,10 +11,10 @@ class UserHistoryResponseTest {
     @DisplayName("PostHistory를 Map에 저장한다")
     void addPostHistory() {
         //given
-        PostHistory postHistory = PostHistory.of(1L, "test", 1L);
+        PostHistoryResponse postHistoryResponse = PostHistoryResponse.of(1L, "test", 1L);
         UserHistoryResponse userHistory = new UserHistoryResponse();
         //when
-        userHistory.addPostHistory(postHistory);
+        userHistory.addPostHistory(postHistoryResponse);
 
         //then
         assertThat(userHistory.getPostHistoryMap()).hasSize(1);
@@ -25,10 +25,10 @@ class UserHistoryResponseTest {
     @DisplayName("CommentHistory를 Map에 저장한다")
     void addCommentHistory() {
         //given
-        CommentHistory commentHistory = CommentHistory.of(1L, "test", "content");
+        CommentHistoryResponse commentHistoryResponse = CommentHistoryResponse.of(1L, "test", "content");
         UserHistoryResponse userHistory = new UserHistoryResponse();
         //when
-        userHistory.addCommentHistory(commentHistory);
+        userHistory.addCommentHistory(commentHistoryResponse);
 
         //then
         assertThat(userHistory.getCommentHistoryMap()).hasSize(1);
@@ -48,7 +48,7 @@ class UserHistoryResponseTest {
     @DisplayName("PostTitle 검색 시에 postId가 있다면 해당 Post Title을 반환한다")
     void getPostTitle() {
         UserHistoryResponse userHistoryResponse = new UserHistoryResponse();
-        userHistoryResponse.addPostHistory(PostHistory.of(1L, "test", 1L));
+        userHistoryResponse.addPostHistory(PostHistoryResponse.of(1L, "test", 1L));
 
 
         String postTitle = userHistoryResponse.getPostTitle(1L);
