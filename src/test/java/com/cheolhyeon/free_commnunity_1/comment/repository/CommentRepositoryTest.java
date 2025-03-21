@@ -97,7 +97,7 @@ class CommentRepositoryTest {
         //given
         DateManager dateManager = new DateManager(LocalDateTime.now());
         LocalDateTime endDate = dateManager.getLocalDateNow();
-        LocalDateTime startDate = dateManager.getMinusMonthsAsLocalDate(1);
+        LocalDateTime startDate = dateManager.getMinusMonthsFromNow(1);
         //when
         List<CommentEntity> result = commentRepository.findByUserIdAndDate(5L, startDate, endDate);
 
