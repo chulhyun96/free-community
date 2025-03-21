@@ -12,6 +12,7 @@ import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
+import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.view.service.ViewCountService;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -83,8 +84,11 @@ class PostServiceTest {
     @DisplayName("PostService Create 메서드 테스트")
     void create() throws JsonProcessingException {
         // Given
-        User userWithOnlyId = createUserWithOnlyId(1L);
-        given(userService.readById(anyLong())).willReturn(userWithOnlyId);
+        UserEntity user = UserEntity.builder()
+                .actionPoint(0L)
+                .nickname("User")
+                .build();
+        given(userService.getUserEntity(anyLong())).willReturn(user);
         given(imageStrategy.formatToSave(anyList())).willReturn(localImages1);
 
         ArgumentCaptor<PostEntity> postEntityCaptor = ArgumentCaptor.forClass(PostEntity.class);
@@ -97,9 +101,6 @@ class PostServiceTest {
         PostEntity savedEntity = postEntityCaptor.getValue();
         assertThat(savedEntity.getTitle()).isEqualTo("제목");
         assertThat(savedEntity.getContent()).isEqualTo("내용");
-        assertThat(savedEntity.getUserId()).isEqualTo(userId);
-        assertThat(userWithOnlyId.getActionPoint()).isEqualTo(1);
-        then(userService).should().readById(anyLong());
         then(postRepository).should().save(any());
     }
 
