@@ -2,7 +2,10 @@ package com.cheolhyeon.free_commnunity_1.user.controller;
 
 import com.cheolhyeon.free_commnunity_1.user.controller.request.UserCreateRequest;
 import com.cheolhyeon.free_commnunity_1.user.controller.request.UserUpdateRequest;
+import com.cheolhyeon.free_commnunity_1.user.controller.response.CommentHistoryResponse;
+import com.cheolhyeon.free_commnunity_1.user.controller.response.PostHistoryResponse;
 import com.cheolhyeon.free_commnunity_1.user.controller.response.UserCreateResponse;
+import com.cheolhyeon.free_commnunity_1.user.controller.response.UserHistoryResponse;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,7 +25,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @WebMvcTest(UserController.class)
@@ -97,6 +100,27 @@ class UserControllerTest {
         //then
         assertThat(user).isEqualTo(update);
         assertThat(request.getNickname()).isEqualTo(user.getNickname());
+    }
+    @Test
+    @DisplayName("유저의 이력을 불러온다")
+    void getUserHistory_Success() throws Exception {
+        //given
+        Long userId = 1L;
+        UserHistoryResponse response = new UserHistoryResponse();
+        response.addPostHistory(PostHistoryResponse.of(1L, "테스트 제목", 100L));
+        response.addCommentHistory(CommentHistoryResponse.of(1L, "테스트 제목", "테스트 댓글"));
+
+        given(userService.getHistory(1L))
+                .willReturn(response);
+        //when
+        mockMvc.perform(get("/users/{userId}/history", userId))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.postHistoryMap['1'].title").value("테스트 제목"))
+                .andExpect(jsonPath("$.postHistoryMap['1'].viewCount").value("100"))
+                .andExpect(jsonPath("$.commentHistoryMap['1'].postTitle").value("테스트 제목"))
+                .andExpect(jsonPath("$.commentHistoryMap['1'].content").value("테스트 댓글"));
+        //then
     }
 
 }
