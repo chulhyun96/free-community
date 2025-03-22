@@ -3,10 +3,7 @@ package com.cheolhyeon.free_commnunity_1.report.repository.entity;
 import com.cheolhyeon.free_commnunity_1.report.controller.request.ReportRequest;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportReason;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportType;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,9 +11,11 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @Entity
+@Table(name = "report")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ReportEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reportId;
 
     private Long reporterId;
