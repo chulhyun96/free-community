@@ -33,7 +33,8 @@ class ReportRedisRepositoryTest {
         String key = "report:users:1";
         Duration ttl = Duration.ofDays(1);
         given(template.opsForValue()).willReturn(operations);
-        given(template.hasKey(key)).willReturn(false);
+        given(operations.setIfAbsent(anyString(),anyString(), any(Duration.class)))
+                .willReturn(true);
         given(operations.increment(key))
                 .willReturn(1L);
         //when
@@ -41,9 +42,6 @@ class ReportRedisRepositoryTest {
 
         //then
         assertThat(result).isEqualTo(1L);
-        then(operations)
-                .should(times(1))
-                .set(key, "0", ttl);
         then(operations)
                 .should(times(1))
                 .increment(key);
@@ -56,15 +54,15 @@ class ReportRedisRepositoryTest {
         String key = "report:users:1";
         Duration ttl = Duration.ofDays(1);
         given(template.opsForValue()).willReturn(operations);
-        given(template.hasKey(key)).willReturn(true);
+        given(operations.setIfAbsent(anyString(), anyString(), any(Duration.class)))
+                .willReturn(false);
         given(operations.increment(key))
-                .willReturn(2L);
+                .willReturn(1L);
         //when
         Long result = reportRedisRepository.report(1L, ttl);
 
         //then
-        assertThat(result).isEqualTo(2L);
-        then(operations).should(never()).set(anyString(), anyString(), any(Duration.class));
+        assertThat(result).isEqualTo(1L);
         then(operations)
                 .should(times(1))
                 .increment(key);
