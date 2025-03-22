@@ -5,12 +5,14 @@ import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.report.controller.request.ReportRequest;
+import com.cheolhyeon.free_commnunity_1.report.repository.ReportRedisRepository;
 import com.cheolhyeon.free_commnunity_1.report.repository.ReportRepository;
 import com.cheolhyeon.free_commnunity_1.report.repository.entity.ReportEntity;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportReason;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportType;
 import com.cheolhyeon.free_commnunity_1.user.repository.UserRepository;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -22,6 +24,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -147,5 +150,39 @@ class ReportServiceTest {
         then(postRepository).shouldHaveNoMoreInteractions();
         then(userRepository).shouldHaveNoMoreInteractions();
         then(reportRedisRepository).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("ReportType이 POST인데 PostEntity를 찾을 수 없을 경우 EntityNotFoundException을 던진다.")
+    void reportWhenReportTypeIsPostEntityNotFound() {
+        //given
+        ReportRequest mockReportRequest = mock(ReportRequest.class);
+        given(mockReportRequest.getReportType()).willReturn("POST");
+
+        given(postRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+
+        // when, then
+        assertThatThrownBy(() -> reportService.report(mockReportRequest))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("해당 게시글을 찾을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("ReportType이 COMMENT인데 PostEntity를 찾을 수 없을 경우 EntityNotFoundException을 던진다.")
+    void reportWhenReportTypeIsCommentEntityNotFound() {
+        //given
+        ReportRequest mockReportRequest = mock(ReportRequest.class);
+        given(mockReportRequest.getReportType()).willReturn("comment");
+
+        given(commentRepository.findById(anyLong()))
+                .willReturn(Optional.empty());
+
+
+        // when, then
+        assertThatThrownBy(() -> reportService.report(mockReportRequest))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("해당 댓글을 찾을 수 없습니다");
     }
 }
