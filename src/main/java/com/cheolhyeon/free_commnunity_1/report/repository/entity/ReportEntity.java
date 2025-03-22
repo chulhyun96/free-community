@@ -20,7 +20,7 @@ public class ReportEntity {
     private Long reportId;
 
     private Long reporterId;
-    private Long targetId;
+    private Long writerId;
 
     @Enumerated(EnumType.STRING)
     private ReportReason reason;
@@ -29,22 +29,20 @@ public class ReportEntity {
     private ReportType reportType;
 
     @Builder
-    private ReportEntity(Long reportId, Long reporterId, Long targetId, ReportReason reason, ReportType reportType) {
+    private ReportEntity(Long reportId, Long reporterId, Long writerId, ReportReason reason, ReportType reportType) {
         this.reportId = reportId;
         this.reporterId = reporterId;
-        this.targetId = targetId;
+        this.writerId = writerId;
         this.reason = reason;
         this.reportType = reportType;
     }
 
-    public static ReportEntity from(ReportRequest request) {
+    public static ReportEntity from(ReportRequest request, ReportType reportType, ReportReason reason) {
         ReportEntity reportEntity = new ReportEntity();
-        reportEntity.reporterId = request.getReportId();
-        reportEntity.targetId = request.getTargetId();
-        reportEntity.reason = request.getReason();
-        reportEntity.reportType = request.getReportType();
+        reportEntity.reporterId = request.getReporterId();
+        reportEntity.writerId = request.getWriterId();
+        reportEntity.reason = reason;
+        reportEntity.reportType = reportType;
         return reportEntity;
     }
-
-
 }
