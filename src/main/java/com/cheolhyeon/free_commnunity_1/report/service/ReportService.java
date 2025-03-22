@@ -47,6 +47,14 @@ public class ReportService {
         return ReportResponse.from(entity, isBanned);
     }
 
+    public String getBanTTL(Long userId) {
+        return userBanService.getBanTTL(userId);
+    }
+
+    public boolean isBanned(Long userId) {
+        return userBanService.isBanned(userId);
+    }
+
     private boolean report(UserEntity userEntity) {
         Long reportCount = reportRedisRepository.report(userEntity.getId(), TTL);
         return userBanService.ban(userEntity.getId(), reportCount);
