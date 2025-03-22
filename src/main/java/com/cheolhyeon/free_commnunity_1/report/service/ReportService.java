@@ -13,6 +13,7 @@ import com.cheolhyeon.free_commnunity_1.report.type.ReportReason;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportType;
 import com.cheolhyeon.free_commnunity_1.user.repository.UserRepository;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
+import com.cheolhyeon.free_commnunity_1.user.service.UserBanService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,6 +30,7 @@ public class ReportService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final ReportRedisRepository reportRedisRepository;
+    private final UserBanService userBanService;
 
     private static final Duration TTL = Duration.ofDays(1);
 
@@ -37,11 +39,12 @@ public class ReportService {
 
         UserEntity userEntity = userRepository.findById(request.getWriterId())
                 .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다"));
-        reportRedisRepository.report(userEntity.getId(), TTL);
+        Long reportCount = reportRedisRepository.report(userEntity.getId(), TTL);
+        boolean isBan = userBanService.ban(userEntity.getId(), reportCount);
 
         ReportReason reason = ReportReason.from(request.getReason());
         ReportEntity entity = reportRepository.save(ReportEntity.from(request, type, reason));
-        return ReportResponse.from(entity);
+        return ReportResponse.from(entity, isBan);
     }
 
     private ReportType getReportType(ReportRequest request) {
@@ -59,9 +62,5 @@ public class ReportService {
                     });
         }
         return type;
-    }
-
-    public Long getReportCount(Long userId) {
-        return reportRedisRepository.getReportCount(userId);
     }
 }
