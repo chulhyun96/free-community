@@ -24,14 +24,13 @@ import java.time.Duration;
 @Transactional
 @RequiredArgsConstructor
 public class ReportService {
-    private static final Duration TTL = Duration.ofDays(1);
-
     private final ReportRepository reportRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final ReportRedisRepository reportRedisRepository;
 
+    private static final Duration TTL = Duration.ofDays(1);
 
     public ReportResponse report(ReportRequest request) {
         ReportType type = getReportType(request);
