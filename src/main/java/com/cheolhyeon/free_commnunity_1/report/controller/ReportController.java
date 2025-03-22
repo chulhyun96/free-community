@@ -5,9 +5,7 @@ import com.cheolhyeon.free_commnunity_1.report.controller.response.ReportRespons
 import com.cheolhyeon.free_commnunity_1.report.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
