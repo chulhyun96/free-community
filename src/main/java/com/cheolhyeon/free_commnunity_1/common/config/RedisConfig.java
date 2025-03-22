@@ -78,4 +78,15 @@ public class RedisConfig {
         return new StringRedisTemplate(commentLikeRedisConnectionFactory);
     }
 
+    @Bean
+    public RedisConnectionFactory reportRedisConnectionFactory() {
+        RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration();
+        configuration.setDatabase(4);
+        return new LettuceConnectionFactory(configuration);
+    }
+    @Bean
+    public StringRedisTemplate reportRedisTemplate(@Qualifier("reportRedisConnectionFactory") RedisConnectionFactory reportRedisConnectionFactor) {
+        return new StringRedisTemplate(reportRedisConnectionFactor);
+    }
+
 }
