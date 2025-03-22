@@ -22,6 +22,13 @@ public class UserBanService {
         return false;
     }
 
+    public String getBanTTL(Long userId) {
+        Long banTTL = banRedisRepository.getBanTTL(userId);
+        long hours = banTTL / 3600;
+        long minutes = (banTTL % 3600) / 60;
+        return String.format("%d시간 %d분", hours, minutes);
+    }
+
     public boolean isBanned(Long userId) {
         return banRedisRepository.isUserBanned(userId);
     }
