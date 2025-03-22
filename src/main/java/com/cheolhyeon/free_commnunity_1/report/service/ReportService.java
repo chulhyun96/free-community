@@ -6,6 +6,7 @@ import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.report.controller.request.ReportRequest;
 import com.cheolhyeon.free_commnunity_1.report.controller.response.ReportResponse;
+import com.cheolhyeon.free_commnunity_1.report.repository.ReportRedisRepository;
 import com.cheolhyeon.free_commnunity_1.report.repository.ReportRepository;
 import com.cheolhyeon.free_commnunity_1.report.repository.entity.ReportEntity;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportReason;
@@ -33,26 +34,31 @@ public class ReportService {
 
 
     public ReportResponse report(ReportRequest request) {
-        ReportType type = ReportType.from(request.getReportType());
+        ReportType type = getReportType(request);
+
+        UserEntity userEntity = userRepository.findById(request.getWriterId())
+                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다"));
+        reportRedisRepository.report(userEntity.getId(), TTL);
+
         ReportReason reason = ReportReason.from(request.getReason());
         ReportEntity entity = reportRepository.save(ReportEntity.from(request, type, reason));
-        // type이 POST인지 확인
+        return ReportResponse.from(entity);
+    }
+
+    private ReportType getReportType(ReportRequest request) {
+        ReportType type = ReportType.from(request.getReportType());
         if (type == ReportType.POST) {
             postRepository.findById(request.getContentId())
                     .ifPresentOrElse(PostEntity::reported, () -> {
                         throw new EntityNotFoundException("해당 게시글을 찾을 수 없습니다");
                     });
         }
-        // type이 COMMENT인지 확인
         if (type == ReportType.COMMENT) {
             commentRepository.findById(request.getContentId())
                     .ifPresentOrElse(CommentEntity::reported, () -> {
                         throw new EntityNotFoundException("해당 댓글을 찾을 수 없습니다");
                     });
         }
-        UserEntity userEntity = userRepository.findById(request.getWriterId())
-                .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다"));
-        reportRedisRepository.report(userEntity.getId(), TTL);
-        return ReportResponse.from(entity);
+        return type;
     }
 }

@@ -1,4 +1,4 @@
-package com.cheolhyeon.free_commnunity_1.report.service;
+package com.cheolhyeon.free_commnunity_1.report.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;

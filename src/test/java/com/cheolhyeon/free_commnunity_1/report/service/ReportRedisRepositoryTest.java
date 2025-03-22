@@ -1,5 +1,6 @@
 package com.cheolhyeon.free_commnunity_1.report.service;
 
+import com.cheolhyeon.free_commnunity_1.report.repository.ReportRedisRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
