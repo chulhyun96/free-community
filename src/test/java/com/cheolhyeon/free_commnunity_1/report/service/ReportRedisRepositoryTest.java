@@ -69,6 +69,30 @@ class ReportRedisRepositoryTest {
                 .increment(key);
         then(operations).shouldHaveNoMoreInteractions();
     }
+    @Test
+    @DisplayName("특정 유저의 신고 횟수를 가지고 오는데 신고 회수가 없을 경우 0을 반환한다.")
+    void getReportCountReturnZero() {
+        //given
+        given(template.opsForValue()).willReturn(operations);
+        given(operations.get(anyString()))
+                .willReturn(null);
+        //when
+        Long reportCount = reportRedisRepository.getReportCount(1L);
+        //then
+        assertThat(reportCount).isZero();
+    }
+    @Test
+    @DisplayName("특정 유저의 최근 신고 회수를 가지고 온다.")
+    void getReportCountReturnCurrentCount() {
+        //given
+        given(template.opsForValue()).willReturn(operations);
+        given(operations.get(anyString()))
+                .willReturn("5");
+        //when
+        Long reportCount = reportRedisRepository.getReportCount(1L);
+        //then
+        assertThat(reportCount).isEqualTo(5);
+    }
 
     @Test
     @DisplayName("UserId를 받아 동적으로 key를 생성한다")
