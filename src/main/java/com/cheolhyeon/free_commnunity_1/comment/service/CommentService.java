@@ -7,9 +7,11 @@ import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
+import com.cheolhyeon.free_commnunity_1.report.service.ReportService;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import com.cheolhyeon.free_commnunity_1.user.type.ActionPoint;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,8 +29,15 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final UserService userService;
     private final CommentLikeService commentLikeService;
+    private final ReportService reportService;
 
     public Comment create(Long postId, CommentCreateRequest request) {
+        if (reportService.isBanned(request.getUserId())) {
+            String banTTL = reportService.getBanTTL(request.getUserId());
+            throw new EntityNotFoundException(
+                    String.format("당신은 다른 사용자들로 부터 지속적인 신고로 인해 %s 동안 커뮤니티 활동이 금지 되었습니다.", banTTL)
+            );
+        }
         UserEntity user = userService.getUserEntity(request.getUserId());
         Comment parent = findParentComment(request);
         CommentEntity entity = commentRepository.save(
