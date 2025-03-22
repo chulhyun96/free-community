@@ -27,6 +27,18 @@ public class PostEntity {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    public void reported() {
+        this.title = "신고에 의해 삭제된 게시글입니다.";
+        this.content = "신고에 의해 삭제된 컨텐츠입니다.";
+    }
+
+    public void update(String images, PostUpdateRequest request) {
+        this.imageUrl = images;
+        this.title = request.getTitle();
+        this.content = request.getContent();
+        this.updatedAt = LocalDateTime.now();
+    }
+
     public static PostEntity from(Post post) {
         PostEntity entity = new PostEntity();
         entity.title = post.getTitle();
@@ -50,12 +62,5 @@ public class PostEntity {
                 .createdAt(this.createdAt)
                 .updatedAt(this.updatedAt)
                 .build();
-    }
-
-    public void update(String images, PostUpdateRequest request) {
-        this.imageUrl = images;
-        this.title = request.getTitle();
-        this.content = request.getContent();
-        this.updatedAt = LocalDateTime.now();
     }
 }
