@@ -22,7 +22,7 @@ public class UserBanService {
         return false;
     }
 
-    public boolean isUserBanned(Long userId) {
+    public boolean isBanned(Long userId) {
         return banRedisRepository.isUserBanned(userId);
     }
 }
