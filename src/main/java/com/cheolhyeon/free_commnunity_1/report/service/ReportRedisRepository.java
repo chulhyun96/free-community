@@ -14,11 +14,20 @@ public class ReportRedisRepository {
 
     public Long report(Long userId, Duration ttl) {
         String key = generateKey(userId);
-        if (Boolean.TRUE.equals(reportRedisTemplate.hasKey(key))) {
+        if (contains(key)) {
             return reportRedisTemplate.opsForValue().increment(key);
         }
         reportRedisTemplate.opsForValue().set(key, "0", ttl);
         return reportRedisTemplate.opsForValue().increment(key);
+    }
+
+    private boolean contains(String key) {
+        return Boolean.TRUE.equals(reportRedisTemplate.hasKey(key));
+    }
+
+    public Long getReportCount(Long userId) {
+        String value = reportRedisTemplate.opsForValue().get(generateKey(userId));
+        return value == null ? 0L : Long.parseLong(value);
     }
 
     private String generateKey(Long userId) {
