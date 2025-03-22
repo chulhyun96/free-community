@@ -75,4 +75,8 @@ public class CommentEntity {
         this.updatedAt = LocalDateTime.now();
     }
 
+    public void reported() {
+        this.deleted = true;
+        this.content = "신고에 의해 삭제된 댓글입니다.";
+    }
 }
