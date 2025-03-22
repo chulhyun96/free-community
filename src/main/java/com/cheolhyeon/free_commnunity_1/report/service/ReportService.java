@@ -39,12 +39,17 @@ public class ReportService {
 
         UserEntity userEntity = userRepository.findById(request.getWriterId())
                 .orElseThrow(() -> new EntityNotFoundException("해당 유저를 찾을 수 없습니다"));
-        Long reportCount = reportRedisRepository.report(userEntity.getId(), TTL);
-        boolean isBan = userBanService.ban(userEntity.getId(), reportCount);
+
+        boolean isBanned = report(userEntity);
 
         ReportReason reason = ReportReason.from(request.getReason());
         ReportEntity entity = reportRepository.save(ReportEntity.from(request, type, reason));
-        return ReportResponse.from(entity, isBan);
+        return ReportResponse.from(entity, isBanned);
+    }
+
+    private boolean report(UserEntity userEntity) {
+        Long reportCount = reportRedisRepository.report(userEntity.getId(), TTL);
+        return userBanService.ban(userEntity.getId(), reportCount);
     }
 
     private ReportType getReportType(ReportRequest request) {
