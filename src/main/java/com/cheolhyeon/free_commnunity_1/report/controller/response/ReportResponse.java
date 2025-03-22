@@ -12,21 +12,24 @@ public class ReportResponse {
     private final Long writerId;
     private final ReportReason reason;
     private final ReportType reportType;
+    private final boolean isBanned;
 
     @Builder
-    private ReportResponse(Long reporterId, Long writerId, ReportReason reason, ReportType reportType) {
+    private ReportResponse(Long reporterId, Long writerId, ReportReason reason, ReportType reportType, boolean isBanned) {
         this.reporterId = reporterId;
         this.writerId = writerId;
         this.reason = reason;
         this.reportType = reportType;
+        this.isBanned = isBanned;
     }
 
-    public static ReportResponse from(ReportEntity report) {
+    public static ReportResponse from(ReportEntity report, boolean isBanned) {
         return new ReportResponse(
                 report.getReportId(),
                 report.getWriterId(),
                 report.getReason(),
-                report.getReportType()
+                report.getReportType(),
+                isBanned
         );
     }
 }
