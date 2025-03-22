@@ -5,7 +5,13 @@ import lombok.Getter;
 @Getter
 public enum ReportType {
     POST,
-    COMMENT,
-    USER;
+    COMMENT;
 
+    public static ReportType from(String reportType) {
+        return switch (reportType.toLowerCase()) {
+            case "post" -> ReportType.POST;
+            case "comment" -> ReportType.COMMENT;
+            default -> null;
+        };
+    }
 }
