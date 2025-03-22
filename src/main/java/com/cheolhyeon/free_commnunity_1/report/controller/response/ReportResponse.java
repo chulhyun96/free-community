@@ -9,14 +9,14 @@ import lombok.Getter;
 @Getter
 public class ReportResponse {
     private final Long reporterId;
-    private final Long targetId;
+    private final Long writerId;
     private final ReportReason reason;
     private final ReportType reportType;
 
     @Builder
-    private ReportResponse(Long reporterId, Long targetId, ReportReason reason, ReportType reportType) {
+    private ReportResponse(Long reporterId, Long writerId, ReportReason reason, ReportType reportType) {
         this.reporterId = reporterId;
-        this.targetId = targetId;
+        this.writerId = writerId;
         this.reason = reason;
         this.reportType = reportType;
     }
@@ -24,7 +24,7 @@ public class ReportResponse {
     public static ReportResponse from(ReportEntity report) {
         return new ReportResponse(
                 report.getReportId(),
-                report.getTargetId(),
+                report.getWriterId(),
                 report.getReason(),
                 report.getReportType()
         );
