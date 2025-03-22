@@ -60,4 +60,8 @@ public class ReportService {
         }
         return type;
     }
+
+    public Long getReportCount(Long userId) {
+        return reportRedisRepository.getReportCount(userId);
+    }
 }
