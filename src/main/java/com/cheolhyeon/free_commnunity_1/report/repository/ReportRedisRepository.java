@@ -9,7 +9,7 @@ import java.time.Duration;
 @Repository
 @RequiredArgsConstructor
 public class ReportRedisRepository {
-    private StringRedisTemplate reportRedisTemplate;
+    private final StringRedisTemplate reportRedisTemplate;
     private static final String KEY = "report:users:%s";
 
     public Long report(Long userId, Duration ttl) {
