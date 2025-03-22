@@ -5,6 +5,7 @@ import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
 import com.cheolhyeon.free_commnunity_1.report.controller.request.ReportRequest;
+import com.cheolhyeon.free_commnunity_1.report.controller.response.ReportResponse;
 import com.cheolhyeon.free_commnunity_1.report.repository.ReportRedisRepository;
 import com.cheolhyeon.free_commnunity_1.report.repository.ReportRepository;
 import com.cheolhyeon.free_commnunity_1.report.repository.entity.ReportEntity;
@@ -12,6 +13,7 @@ import com.cheolhyeon.free_commnunity_1.report.type.ReportReason;
 import com.cheolhyeon.free_commnunity_1.report.type.ReportType;
 import com.cheolhyeon.free_commnunity_1.user.repository.UserRepository;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
+import com.cheolhyeon.free_commnunity_1.user.service.UserBanService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +45,9 @@ class ReportServiceTest {
 
     @Mock
     ReportRedisRepository reportRedisRepository;
+
+    @Mock
+    UserBanService userBanService;
 
     @InjectMocks
     ReportService reportService;
@@ -184,5 +189,65 @@ class ReportServiceTest {
         assertThatThrownBy(() -> reportService.report(mockReportRequest))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("해당 댓글을 찾을 수 없습니다");
+    }
+
+    @Test
+    @DisplayName("reportCount가 5가 되지 않으면 isBan의 값은 false이다")
+    void isBanNotOverFiveReturnFalse() {
+        //given
+        UserEntity mockUserEntity = mock(UserEntity.class);
+        CommentEntity mockCommentEntity = mock(CommentEntity.class);
+
+        ReportRequest request = new ReportRequest(1L, 2L, 1L, "욕설", "comment");
+        ReportType type = ReportType.from("comment");
+        ReportReason reason = ReportReason.from("욕설");
+        ReportEntity entity = ReportEntity.from(request, type, reason);
+
+        given(reportRepository.save(any(ReportEntity.class)))
+                .willReturn(entity);
+        given(commentRepository.findById(anyLong()))
+                .willReturn(Optional.of(mockCommentEntity));
+        given(userRepository.findById(anyLong()))
+                .willReturn(Optional.of(mockUserEntity));
+        given(userBanService.ban(anyLong(), anyLong()))
+                .willReturn(false);
+
+        //when
+        ReportResponse result = reportService.report(request);
+
+        //then
+        assertThat(result.isBanned()).isFalse();
+        then(userBanService).should(times(1))
+                .ban(anyLong(), anyLong());
+    }
+
+    @Test
+    @DisplayName("reportCount가 5가 되어 isBan의 값은 true이다")
+    void isBanNotOverFiveReturnTrue() {
+        //given
+        UserEntity mockUserEntity = mock(UserEntity.class);
+        CommentEntity mockCommentEntity = mock(CommentEntity.class);
+
+        ReportRequest request = new ReportRequest(1L, 2L, 1L, "욕설", "comment");
+        ReportType type = ReportType.from("comment");
+        ReportReason reason = ReportReason.from("욕설");
+        ReportEntity entity = ReportEntity.from(request, type, reason);
+
+        given(reportRepository.save(any(ReportEntity.class)))
+                .willReturn(entity);
+        given(commentRepository.findById(anyLong()))
+                .willReturn(Optional.of(mockCommentEntity));
+        given(userRepository.findById(anyLong()))
+                .willReturn(Optional.of(mockUserEntity));
+        given(userBanService.ban(anyLong(), anyLong()))
+                .willReturn(true);
+
+        //when
+        ReportResponse result = reportService.report(request);
+
+        //then
+        assertThat(result.isBanned()).isTrue();
+        then(userBanService).should(times(1))
+                .ban(anyLong(), anyLong());
     }
 }
