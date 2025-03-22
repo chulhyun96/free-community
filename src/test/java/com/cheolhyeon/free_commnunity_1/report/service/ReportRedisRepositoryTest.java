@@ -83,6 +83,4 @@ class ReportRedisRepositoryTest {
         //then
         assertThat(formatted).isEqualTo("report:users:1");
     }
-
-
 }
