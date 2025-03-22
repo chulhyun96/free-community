@@ -15,4 +15,13 @@ public enum ReportReason {
         this.description = description;
     }
 
+    public static ReportReason from(String description) {
+        return switch (description) {
+            case "욕설" -> SWEAR;
+            case "인격 모독" -> INAPPROPRIATE_AD;
+            case "매크로" -> MACRO;
+            case "타인 비하" -> PERSONAL_INSULT;
+            default -> null;
+        };
+    }
 }
