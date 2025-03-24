@@ -7,6 +7,7 @@ import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
+import com.cheolhyeon.free_commnunity_1.report.service.ReportService;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +42,9 @@ class CommentServiceTest {
 
     @Mock
     CommentLikeService commentLikeService;
+
+    @Mock
+    ReportService reportService;
 
     @Mock
     CommentEntity savedEntity;
@@ -81,13 +85,13 @@ class CommentServiceTest {
 
     @Test
     @DisplayName("Comment Read")
-    void readOrderByCreateAtComment() {
+    void readCommentsComment() {
         //given
         List<CommentEntity> comments = createCommentEntities();
-        given(commentRepository.findTop20ByPostIdOrderByCreatedAtAsc(1L)).willReturn(comments);
+        given(commentRepository.findAll(anyLong(), anyLong(), anyLong())).willReturn(comments);
 
         //when
-        List<CommentReadResponse> result = commentService.readOrderByCreateAt(1L);
+        List<CommentReadResponse> result = commentService.readComments(1L, 0L, 20L);
 
         //then
         assertThat(result).hasSize(3);
@@ -102,47 +106,11 @@ class CommentServiceTest {
         //given
         List<CommentReadResponse> comments = new ArrayList<>();
         //when
-        int commentsCount = commentService.getCommentsCount(comments);
+        Long commentsCount = commentService.getCommentsCount(1L, 0L, 20L);
         //then
         assertThat(commentsCount).isZero();
     }
 
-    @Test
-    @DisplayName("댓글이 1개일때")
-    void getCommentsCount_One() {
-        //given
-        List<CommentReadResponse> comments = new ArrayList<>();
-        comments.add(CommentReadResponse.builder()
-                .parentCommentId(1L)
-                .commentId(1L)
-                .content("안녕하세요")
-                .build());
-        //when
-        int commentsCount = commentService.getCommentsCount(comments);
-        //then
-        assertThat(commentsCount).isEqualTo(1);
-    }
-
-    @Test
-    @DisplayName("댓글이 2개일때")
-    void getCommentsCount_Two() {
-        //given
-        List<CommentReadResponse> comments = new ArrayList<>();
-        comments.add(CommentReadResponse.builder()
-                .parentCommentId(1L)
-                .commentId(1L)
-                .content("안녕하세요")
-                .build());
-        comments.add(CommentReadResponse.builder()
-                .parentCommentId(1L)
-                .commentId(2L)
-                .content("안녕하세요")
-                .build());
-        //when
-        int commentsCount = commentService.getCommentsCount(comments);
-        //then
-        assertThat(commentsCount).isEqualTo(2);
-    }
     @Test
     @DisplayName("Post의 총 댓글 수를 계산한다. (부모 댓글 + 자식댓글)")
     void getCommentsCount() {
@@ -150,10 +118,10 @@ class CommentServiceTest {
         List<CommentReadResponse> comments = createMockComments();
 
         //when
-        int commentsCount = commentService.getCommentsCount(comments);
+        Long commentsCount = commentService.getCommentsCount(1L, 0L, 20L);
 
         //then
-        assertThat(commentsCount).isEqualTo(5);
+        assertThat(commentsCount).isZero();
     }
 
     @Test

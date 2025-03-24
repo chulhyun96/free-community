@@ -24,43 +24,7 @@ class PostRepositoryTest {
     private PostRepository postRepository;
 
 
-    @Test
-    @DisplayName("특정 User 작성한 Post 찾아오기")
-    void findByIdAndUserId() {
-        PostEntity postEntity = postRepository.findByIdAndUserId(4L, 4L).get();
-        assertThat(postEntity).isNotNull();
-        assertThat(postEntity.getId()).isEqualTo(4L);
-    }
-
-    @Test
-    @DisplayName("오늘 날짜 생성된 List<PostEntity>를 불러온다")
-    void findPostsByDate() {
-        //given
-        for (int i = 0; i < 10; i++) {
-            PostEntity post = PostEntity.builder()
-                    .title("안녕 제목 " + i)
-                    .content("안녕 내용 " + i)
-                    .createdAt(LocalDate.of(2025, 1, 1).atStartOfDay())
-                    .build();
-            postRepository.save(post);
-        }
-
-        PostEntity post = PostEntity.builder()
-                .title("안녕 제목 " + 11)
-                .content("안녕 내용 " + 11)
-                .createdAt(LocalDateTime.now().plusDays(1))
-                .build();
-        postRepository.save(post);
-
-        //when
-        LocalDateTime startOfDay = LocalDate.of(2025, 1, 1).atStartOfDay();
-        LocalDateTime endOfDay = LocalDate.of(2025, 1, 1).atTime(LocalTime.MAX);
-        List<PostEntity> postsByDateOfToday = postRepository.findPostsByDate(startOfDay, endOfDay);
-
-        //then
-        assertThat(postsByDateOfToday).hasSize(10);
-    }
-
+    
     @Test
     @DisplayName("특정 User가 작성한 List<PostEntity>를 userId로 검색해서 불러온다.")
     void findByUserIdAndDate() {

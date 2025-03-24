@@ -4,6 +4,7 @@ import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadRe
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
+import com.cheolhyeon.free_commnunity_1.comment.domain.PageLimitCalculator;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
@@ -61,21 +62,17 @@ public class CommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<CommentReadResponse> readOrderByCreateAt(Long postId) {
-        List<CommentEntity> commentEntities = commentRepository.findTop20ByPostIdOrderByCreatedAtAsc(postId);
+    public List<CommentReadResponse> readComments(Long postId, Long page, Long pageSize) {
+        List<CommentEntity> commentEntities = commentRepository.findAll(postId, (page - 1) * pageSize, pageSize);
         Map<Long, Long> likeReaderBoard = getLikeReaderBoard(postId, commentEntities);
         List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
         return CommentReadResponse.of(commentsOfTree, likeReaderBoard);
     }
+    public Long getCommentsCount(Long postId, Long page, Long pageSize) {
+        return commentRepository.count(
+                postId,
+                PageLimitCalculator.calculatePageLimit(page, pageSize, 10L));
 
-    @Transactional(readOnly = true)
-    public List<CommentReadResponse> readOrderByCommentLikes(Long postId) {
-        List<CommentEntity> commentEntities = commentRepository.findTop20ByPostIdOrderByCreatedAtAsc(postId);
-        Map<Long, Long> likeReaderBoard = getLikeReaderBoard(postId, commentEntities);
-        List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
-
-        List<CommentReadResponse> responses = CommentReadResponse.of(commentsOfTree, likeReaderBoard);
-        return CommentReadResponse.orderByLikesCountDesc(responses);
     }
 
     private Map<Long, Long> getLikeReaderBoard(Long postId, List<CommentEntity> commentEntities) {
@@ -87,11 +84,6 @@ public class CommentService {
         return likeReaderBoard;
     }
 
-    public int getCommentsCount(List<CommentReadResponse> comments) {
-        return comments.size() + comments.stream()
-                .mapToInt(comment -> comment.getReplies().size())
-                .sum();
-    }
 
     public void update(Long postId, Long commentId, CommentUpdateRequest request) {
         CommentEntity findEntity = commentRepository.findByPostIdAndCommentId(postId, commentId)

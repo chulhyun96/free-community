@@ -11,6 +11,7 @@ import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import com.cheolhyeon.free_commnunity_1.post.image.formatter.ImageStrategy;
 import com.cheolhyeon.free_commnunity_1.post.repository.PostRepository;
 import com.cheolhyeon.free_commnunity_1.post.repository.entity.PostEntity;
+import com.cheolhyeon.free_commnunity_1.report.service.ReportService;
 import com.cheolhyeon.free_commnunity_1.user.domain.User;
 import com.cheolhyeon.free_commnunity_1.user.repository.entity.UserEntity;
 import com.cheolhyeon.free_commnunity_1.user.service.UserService;
@@ -63,6 +64,9 @@ class PostServiceTest {
     @Mock
     CategoryService categoryService;
 
+    @Mock
+    ReportService reportService;
+
     @InjectMocks
     PostService postService;
 
@@ -112,7 +116,7 @@ class PostServiceTest {
         given(viewCountService.increase(postId, userId)).willReturn(1L);
         //when
         Post readPost = postService.readById(postId, userId);
-        PostReadResponse response = PostReadResponse.from(readPost, 1L, "User", Category.GENERAL.getName(), null, 0L, 0);
+        PostReadResponse response = PostReadResponse.from(readPost, 1L, "User", Category.GENERAL.getName(), null, 0L, 0L);
         //then
 
         assertThat(readPost.getTitle()).isEqualTo(response.getTitle());

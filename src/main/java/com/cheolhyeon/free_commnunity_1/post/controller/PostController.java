@@ -60,18 +60,17 @@ public class PostController {
 
     @GetMapping("/posts/{postId}")
     public ResponseEntity<PostReadResponse> readById(
-            @PathVariable Long postId,
-            @RequestHeader("X-User-Id") Long userId,
-            @RequestParam(required = false, name = "sort", defaultValue = "createdAt") String sort) {
+            @PathVariable("postId") Long postId,
+            @RequestParam(name = "page", defaultValue = "1", required = false) Long page,
+            @RequestParam(name = "pageSize", defaultValue = "20", required = false) Long pageSize,
+            @RequestHeader("X-User-Id") Long userId) {
 
         Post post = postService.readById(postId, userId);
         Long currentViewCount = postService.getCurrentViewCount(postId);
         Long currentPostLikeCount = postLikeService.getCurrentPostLikeCount(postId);
         User user = postService.getUser(userId);
         Category category = postService.getCategory(post.getCategoryId());
-        List<CommentReadResponse> comments = "likes".equals(sort)
-                ? commentService.readOrderByCommentLikes(postId)
-                : commentService.readOrderByCreateAt(postId);
+        List<CommentReadResponse> comments = commentService.readComments(postId, page, pageSize);
 
         return ResponseEntity.ok(PostReadResponse.from(
                 post,
@@ -80,7 +79,7 @@ public class PostController {
                 category.getName(),
                 comments,
                 currentPostLikeCount,
-                commentService.getCommentsCount(comments)
+                commentService.getCommentsCount(postId, page, pageSize)
         ));
     }
 

@@ -20,16 +20,20 @@ Content-Type: image/png  # ✅ 파일 타입 명시
 < /Users/cheolhyeon/desktop/오잉??.png
 --WebAppBoundary--
 
-### GET 무한스크롤
+### 게시글 무한스크롤 5754ms
 GET localhost:8080/posts-infinite
 
-### GET 페이징
-GET localhost:8080/posts
+### 게시글 페이징 5284ms offset 1만시 25초 걸림
+GET localhost:8080/posts?page=10000
 
-### GET
-GET localhost:8080/posts/5
+### GET offset 백만시 12 ~ 13초, 바로하면 200
+GET localhost:8080/posts/40108576?page=1000000
 X-User-Id: 4
 
 ### 인기글 가져오기
 GET http://localhost:8080/posts/hot
+
+### 검색하기 page = 1 검색 8초 offset 늘어날 수록 증가 offset30에서 14초걸림
+GET http://localhost:8080/posts?page=30&title=title
+
 

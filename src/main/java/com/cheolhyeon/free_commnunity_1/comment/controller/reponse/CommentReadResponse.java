@@ -1,6 +1,7 @@
 package com.cheolhyeon.free_commnunity_1.comment.controller.reponse;
 
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
+import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 
@@ -55,5 +56,14 @@ public class CommentReadResponse {
         return responses.stream()
                 .sorted(Comparator.comparingLong(CommentReadResponse::getLikeCount).reversed())
                 .toList();
+    }
+
+    public static CommentReadResponse from(CommentEntity commentEntity) {
+        return CommentReadResponse.builder()
+                .commentId(commentEntity.getCommentId())
+                .parentCommentId(commentEntity.getParentCommentId())
+                .createdAt(commentEntity.getCreatedAt())
+                .content(commentEntity.getContent())
+                .build();
     }
 }

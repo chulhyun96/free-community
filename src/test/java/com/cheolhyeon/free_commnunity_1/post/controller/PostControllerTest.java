@@ -156,9 +156,8 @@ class PostControllerTest {
         given(postService.getCategory(1L)).willReturn(Category.GENERAL);
 
         List<CommentReadResponse> comments = createRootCommentWithReplies("RootContent", "ReplyContent");
-        given(commentService.readOrderByCreateAt(postId)).willReturn(comments);
+        given(commentService.readComments(anyLong(), anyLong(), anyLong())).willReturn(comments);
 
-        given(commentService.getCommentsCount(comments)).willReturn(comments.size());
         //when
         mockMvc.perform(get("/posts/{postId}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
@@ -204,8 +203,6 @@ class PostControllerTest {
         given(postService.getCurrentViewCount(postId)).willReturn(100L);
         given(postService.getUser(userId)).willReturn(user);
         given(postService.getCategory(post.getCategoryId())).willReturn(category);
-        given(commentService.readOrderByCommentLikes(postId)).willReturn(comments);
-        given(commentService.getCommentsCount(comments)).willReturn(comments.size());
 
         mockMvc.perform(get("/posts/{postId}", postId)
                         .header("X-User-Id", userId)

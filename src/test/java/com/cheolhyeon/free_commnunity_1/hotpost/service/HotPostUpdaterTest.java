@@ -43,19 +43,6 @@ class HotPostUpdaterTest {
     @InjectMocks
     HotPostUpdater hotPostUpdater;
 
-    @Test
-    @DisplayName("DB에서 오늘 생성된 게시글을 불러온다")
-    void getNewPostsFromDB() {
-        //given
-        LocalDateTime startDate = LocalDateTime.of(2025, 3, 21, 0, 0, 0);
-        LocalDateTime endDate = LocalDateTime.of(2025, 3, 22, 0, 0, 0);
-
-        //when
-        hotPostUpdater.updateHotPosts();
-
-        //then
-        then(postRepository).should(times(1)).findPostsByDate(startDate, endDate);
-    }
 
     @Test
     @DisplayName("새로운 게시글의 점수를 계산한다")

@@ -30,27 +30,7 @@ public class Comment {
     private List<Comment> replies = new ArrayList<>();
 
     public static List<Comment> buildCommentsTree(List<CommentEntity> commentEntities) {
-        /*return getCommentsOfTree(commentEntities, new ArrayList<>());*/
         return getCommentsOfTree2(commentEntities);
-    }
-
-    // O(n^2)
-    private static List<Comment> getCommentsOfTree(List<CommentEntity> commentEntities, List<Comment> parent) {
-        for (CommentEntity commentEntity : commentEntities) {
-            Comment comment = commentEntity.toModel();
-
-            if (!comment.isRoot()) {
-                parent.add(comment);
-                continue;
-            }
-
-            for (Comment rootComment : parent) {
-                if (rootComment.getCommentId().equals(comment.getParentCommentId())) {
-                    rootComment.getReplies().add(comment);
-                }
-            }
-        }
-        return parent;
     }
 
     // O(n)

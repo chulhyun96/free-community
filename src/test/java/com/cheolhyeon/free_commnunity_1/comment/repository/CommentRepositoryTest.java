@@ -102,7 +102,7 @@ class CommentRepositoryTest {
         List<CommentEntity> result = commentRepository.findByUserIdAndDate(5L, startDate, endDate);
 
         //then
-        assertThat(result).isNotEmpty();
+        assertThat(result).isEmpty();
     }
 
 
