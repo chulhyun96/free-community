@@ -79,7 +79,7 @@ public class PostController {
                 category.getName(),
                 comments,
                 currentPostLikeCount,
-                commentService.getCommentsCount(postId, page, pageSize)
+                commentService.getCommentsCount(postId)
         ));
     }
 
