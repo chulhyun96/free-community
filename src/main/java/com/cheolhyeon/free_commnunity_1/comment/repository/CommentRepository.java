@@ -45,12 +45,7 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Long> {
     @Query("select c from CommentEntity c where c.userId = :userId and c.createdAt between :startDate and :endDate")
     List<CommentEntity> findByUserIdAndDate(@Param("userId") Long userId, @Param("startDate") LocalDateTime startDate, @Param("endDate") LocalDateTime endDate);
 
-    @Query(
-            value = "select count(*) from (" +
-                    "   select comment_id from comment where post_id = :postId limit :limit" +
-                    ") t",
-            nativeQuery = true
-    )
-    Long count(@Param("postId") Long postId, @Param("limit") long limit);
+    @Query("select count(*) from CommentEntity c where c.postId = :postId")
+    Long count(@Param("postId") Long postId);
 }
 
