@@ -5,6 +5,9 @@ import com.cheolhyeon.free_commnunity_1.commentlike.repository.CommentLikeRedisR
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
+
 @Service
 @RequiredArgsConstructor
 public class CommentLikeService {
@@ -19,8 +22,8 @@ public class CommentLikeService {
         return likeComment(userId, commentId, postId);
     }
 
-    public Long getCurrentCommentLikeCount(Long postId, Long commentId) {
-        return commentLikeRedisRepository.getCurrentCommentLikeCount(postId, commentId);
+    public Map<Long, Long> getCurrentCommentLikeCount(Long postId, List<Long> commentIds) {
+        return commentLikeRedisRepository.getCurrentCommentLikeCount(postId, commentIds);
     }
 
     private Long likeComment(Long userId, Long commentId, Long postId) {
