@@ -4,7 +4,6 @@ import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadRe
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentCreateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.controller.request.CommentUpdateRequest;
 import com.cheolhyeon.free_commnunity_1.comment.domain.Comment;
-import com.cheolhyeon.free_commnunity_1.comment.domain.PageLimitCalculator;
 import com.cheolhyeon.free_commnunity_1.comment.repository.CommentRepository;
 import com.cheolhyeon.free_commnunity_1.comment.repository.entity.CommentEntity;
 import com.cheolhyeon.free_commnunity_1.commentlike.service.CommentLikeService;
@@ -68,18 +67,21 @@ public class CommentService {
         List<Comment> commentsOfTree = Comment.buildCommentsTree(commentEntities);
         return CommentReadResponse.of(commentsOfTree, likeReaderBoard);
     }
-    public Long getCommentsCount(Long postId, Long page, Long pageSize) {
-        return commentRepository.count(
-                postId,
-                PageLimitCalculator.calculatePageLimit(page, pageSize, 10L));
 
+    public Long getCommentsCount(Long postId) {
+        return commentRepository.count(postId);
     }
 
     private Map<Long, Long> getLikeReaderBoard(Long postId, List<CommentEntity> commentEntities) {
+        List<Long> commentIds = commentEntities.stream()
+                .map(CommentEntity::getCommentId)
+                .toList();
+
+        Map<Long, Long> likeCounts = commentLikeService.getCurrentCommentLikeCount(postId, commentIds);
+
         Map<Long, Long> likeReaderBoard = new HashMap<>();
-        for (CommentEntity commentEntity : commentEntities) {
-            Long currentCommentLikeCount = commentLikeService.getCurrentCommentLikeCount(postId, commentEntity.getCommentId());
-            likeReaderBoard.put(commentEntity.getCommentId(), currentCommentLikeCount);
+        for (Long commentId : commentIds) {
+            likeReaderBoard.put(commentId, likeCounts.getOrDefault(commentId, 0L));
         }
         return likeReaderBoard;
     }
@@ -112,9 +114,7 @@ public class CommentService {
     }
 
     private void delete(Comment comment) {
-        // 자식이 없는 루트 댓글일 경우 삭제
         commentRepository.delete(CommentEntity.of(comment));
-        // 하위 댓글일 경우
         if (!comment.isRoot()) {
             commentRepository.findById(comment.getParentCommentId())
                     .map(CommentEntity::toModel)
