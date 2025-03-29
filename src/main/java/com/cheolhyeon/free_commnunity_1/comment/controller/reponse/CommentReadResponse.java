@@ -32,7 +32,6 @@ public class CommentReadResponse {
         if (commentsOfTree == null || commentsOfTree.isEmpty()) {
             return new ArrayList<>();
         }
-
         List<CommentReadResponse> responseList = new ArrayList<>();
         for (Comment comment : commentsOfTree) {
             Long likeCount = likeReaderBoard.get(comment.getCommentId());
@@ -49,21 +48,6 @@ public class CommentReadResponse {
                 .likeCount(likeCount)
                 .createdAt(comment.getCreatedAt())
                 .replies(of(comment.getReplies(), likeReaderBoard))
-                .build();
-    }
-
-    public static List<CommentReadResponse> orderByLikesCountDesc(List<CommentReadResponse> responses) {
-        return responses.stream()
-                .sorted(Comparator.comparingLong(CommentReadResponse::getLikeCount).reversed())
-                .toList();
-    }
-
-    public static CommentReadResponse from(CommentEntity commentEntity) {
-        return CommentReadResponse.builder()
-                .commentId(commentEntity.getCommentId())
-                .parentCommentId(commentEntity.getParentCommentId())
-                .createdAt(commentEntity.getCreatedAt())
-                .content(commentEntity.getContent())
                 .build();
     }
 }
