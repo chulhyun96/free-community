@@ -39,7 +39,7 @@ class ViewCountServiceTest {
         // Given
         Long postId = 1L;
         Long userId = 2L;
-        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(3))).willReturn(true);
+        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(5))).willReturn(true);
         given(viewCountRedisRepository.read(postId)).willReturn(100L);
 
         // When
@@ -57,7 +57,7 @@ class ViewCountServiceTest {
         // Given
         Long postId = 1L;
         Long userId = 2L;
-        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(3))).willReturn(false);
+        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(5))).willReturn(false);
         given(viewCountRedisRepository.increase(postId)).willReturn(7L);
 
         // When
@@ -75,16 +75,16 @@ class ViewCountServiceTest {
         // Given
         Long postId = 1L;
         Long userId = 2L;
-        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(3))).willReturn(false);
+        given(viewCountDistributedLockRepository.lock(postId, userId, Duration.ofMinutes(5))).willReturn(false);
         given(viewCountRedisRepository.increase(postId)).willReturn(50L);
 
         // When
         Long result = viewCountService.increase(postId, userId);
 
         // Then
-        assertThat(result).isEqualTo(50L); // ✅ 증가된 조회수 반환
+        assertThat(result).isEqualTo(50L);
         verify(viewCountRedisRepository, times(1)).increase(postId);
-        verify(viewCountBackUpService, times(1)).backUp(postId, userId);
+        verify(viewCountBackUpService, times(1)).backUp(postId, result);
     }
 
     @Test
