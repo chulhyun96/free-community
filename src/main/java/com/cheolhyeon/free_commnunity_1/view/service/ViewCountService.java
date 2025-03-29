@@ -11,7 +11,7 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class ViewCountService {
     private static final int BACK_UP_BATCH_SIZE = 50;
-    private static final Duration TTL = Duration.ofMinutes(3);
+    private static final Duration TTL = Duration.ofMinutes(5);
     private final ViewCountRedisRepository viewCountRedisRepository;
     private final ViewCountBackUpService viewCountBackUpService;
     private final ViewCountDistributedLockRepository viewCountDistributedLockRepository;
@@ -23,7 +23,7 @@ public class ViewCountService {
 
         Long currentViewCount = viewCountRedisRepository.increase(postId);
         if (currentViewCount % BACK_UP_BATCH_SIZE == 0) {
-            viewCountBackUpService.backUp(postId, userId);
+            viewCountBackUpService.backUp(postId, currentViewCount);
         }
         return currentViewCount;
     }
