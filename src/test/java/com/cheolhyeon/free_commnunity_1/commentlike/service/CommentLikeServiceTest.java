@@ -9,6 +9,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Map;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
@@ -62,10 +65,11 @@ class CommentLikeServiceTest {
     void doTest() {
         //given
         Long postId = 1L;
-        given(commentLikeService.getCurrentCommentLikeCount(postId, commentId)).willReturn(100L);
+        List<Long> longs = List.of(1L, 2L, 3L, 4L);
+        given(commentLikeService.getCurrentCommentLikeCount(postId, longs)).willReturn(Map.of(1L,2L));
         //when
-        commentLikeService.getCurrentCommentLikeCount(postId, commentId);
+        commentLikeService.getCurrentCommentLikeCount(postId, longs);
         //then
-        then(commentLikeRedisRepository).should(times(1)).getCurrentCommentLikeCount(postId, commentId);
+        then(commentLikeRedisRepository).should(times(1)).getCurrentCommentLikeCount(postId, longs);
     }
 }
