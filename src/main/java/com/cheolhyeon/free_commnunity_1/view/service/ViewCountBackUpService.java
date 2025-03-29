@@ -4,6 +4,7 @@ import com.cheolhyeon.free_commnunity_1.view.repository.ViewCountBackUpRepositor
 import com.cheolhyeon.free_commnunity_1.view.repository.entity.ViewCountEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 @Component
@@ -11,7 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class ViewCountBackUpService {
     private final ViewCountBackUpRepository viewCountBackUpRepository;
 
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void backUp(Long postId, Long viewCount) {
         int result = viewCountBackUpRepository.updateViewCount(postId, viewCount);
         if (result == 0) {
