@@ -33,9 +33,7 @@ public class Comment {
         return getCommentsOfTree2(commentEntities);
     }
 
-    // O(n)
     private static List<Comment> getCommentsOfTree2(List<CommentEntity> commentEntities) {
-        // 1. CommentEntity -> Comment 변환
         List<Comment> comments = commentEntities.stream()
                 .map(CommentEntity::toModel)
                 .toList();
@@ -56,7 +54,6 @@ public class Comment {
         return rootComments;
     }
 
-
     public boolean isRoot() {
         return Objects.equals(parentCommentId, commentId);
     }
@@ -65,5 +62,4 @@ public class Comment {
         deleted = true;
         content = "사용자 요청에 의해 삭제된 댓글입니다.";
     }
-
 }
