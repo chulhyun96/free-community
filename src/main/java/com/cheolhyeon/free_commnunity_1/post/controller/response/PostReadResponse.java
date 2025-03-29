@@ -1,7 +1,6 @@
 package com.cheolhyeon.free_commnunity_1.post.controller.response;
 
 
-import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentPageResponse;
 import com.cheolhyeon.free_commnunity_1.comment.controller.reponse.CommentReadResponse;
 import com.cheolhyeon.free_commnunity_1.post.domain.Post;
 import lombok.*;
