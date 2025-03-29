@@ -106,7 +106,7 @@ class CommentServiceTest {
         //given
         List<CommentReadResponse> comments = new ArrayList<>();
         //when
-        Long commentsCount = commentService.getCommentsCount(1L, 0L, 20L);
+        Long commentsCount = commentService.getCommentsCount(1L);
         //then
         assertThat(commentsCount).isZero();
     }
@@ -118,7 +118,7 @@ class CommentServiceTest {
         List<CommentReadResponse> comments = createMockComments();
 
         //when
-        Long commentsCount = commentService.getCommentsCount(1L, 0L, 20L);
+        Long commentsCount = commentService.getCommentsCount(1L);
 
         //then
         assertThat(commentsCount).isZero();
