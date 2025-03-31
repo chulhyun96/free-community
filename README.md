@@ -86,3 +86,78 @@
     - 하루에 5회 이상일 경우 페널티 부여. 하루가 넘어가면 초기화
     - 하루에 5회 이상 해당 유저의 POST 및 COMMENT가 신고될 경우
         - 3일 동안 게시글 작성 및 댓글 작성 금지
+---
+
+```mermaid
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Controller
+    participant Service
+    participant Repository
+    participant Database
+    participant Redis
+
+    %% 회원가입 및 로그인
+    Client->>Controller: 회원가입/로그인 요청
+    Controller->>Service: 요청 DTO 전달
+    Service->>Repository: DB 조회/저장
+    Repository->>Database: SQL 쿼리 수행
+    Database-->>Repository: 결과 반환
+    Repository-->>Service: 회원 정보 반환
+    Service-->>Controller: 결과 DTO 반환
+    Controller-->>Client: 세션 생성 및 응답
+
+    %% 게시글 작성/조회
+    Client->>Controller: 게시글 작성/조회 요청
+    Controller->>Service: 요청 DTO 전달
+    Service->>Repository: 게시글 저장/조회 요청
+    Repository->>Database: SQL 수행 (Post, Category)
+    Database-->>Repository: 게시글 데이터 반환
+    Repository-->>Service: 게시글 데이터 반환
+    Service->>Redis: 조회수 SETNX (어뷰징 방지)
+    Redis-->>Service: 조회수 SET 결과 반환
+    alt 조회수 증가
+        Service->>Redis: 조회수 INCR
+        Redis-->>Service: 조회수 누적값 반환
+        alt 조회수 50 초과
+            Service->>Database: 누적 조회수 DB 반영
+        end
+    end
+    Service-->>Controller: 게시글 응답 DTO 반환
+    Controller-->>Client: 게시글 응답
+
+    %% 댓글 작성 및 좋아요
+    Client->>Controller: 댓글 작성/좋아요 요청
+    Controller->>Service: 댓글 DTO 전달
+    Service->>Repository: 댓글 저장/좋아요 토글
+    Repository->>Database: SQL 수행 (Comment/Like)
+    Database-->>Repository: 댓글 데이터 반환
+    Repository-->>Service: 댓글 데이터 반환
+    Service-->>Controller: 댓글 응답 DTO 반환
+    Controller-->>Client: 댓글 응답
+
+    %% 신고 및 사용자 정지
+    Client->>Controller: 신고 요청
+    Controller->>Service: 신고 DTO 전달
+    Service->>Repository: 신고 내역 저장
+    Repository->>Database: 신고 저장
+    Database-->>Repository: 저장 완료
+    Repository-->>Service: 신고 수 확인
+    Service->>Redis: 사용자 신고수 증가
+    Redis-->>Service: 신고 수 반환
+    alt 신고 수 5 이상
+        Service->>Redis: 사용자 정지 키 생성 (3일 TTL)
+        Redis-->>Service: 정지 완료
+    end
+    Service-->>Controller: 신고 처리 결과 반환
+    Controller-->>Client: 신고 응답
+
+    %% 인기글 스케줄러
+    loop 1시간마다
+        Service->>Database: 인기글 조회 (좋아요*2 + 조회수)
+        Database-->>Service: 인기글 상위 10개 반환
+        Service->>Redis: 인기글 캐싱
+    end
+```
+```
