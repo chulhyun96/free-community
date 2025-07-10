@@ -79,7 +79,7 @@ flowchart TD
 
 - Java 17 이상
 - Gradle 8 이상
-- MariaDB (기본: `localhost:3306`, 사용자: `root`, 비밀번호: `root`)
+- MariaDB (기본: 로컬)
 - Redis (기본: 로컬)
 
 ### 설치
@@ -87,18 +87,6 @@ flowchart TD
 ```bash
 git clone <repo-url>
 cd free_commnunity_1
-```
-
-`src/main/resources/application.yml` 환경설정:
-
-```yaml
-spring:
-  datasource:
-    url: jdbc:mariadb://localhost:3306/free_community
-    username: root
-    password: root
-image:
-  base-path: "/이미지/저장/경로"
 ```
 
 ### 빌드 및 실행
